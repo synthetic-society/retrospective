@@ -1,11 +1,13 @@
 {
-  "main": "dist/_worker.js/index.js",
   "name": "retrospective",
+  "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-01-18",
-  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
     "binding": "ASSETS",
-    "directory": "./dist"
+    "directory": "./dist",
+    "not_found_handling": "none",
+    "run_worker_first": true
   },
   "observability": {
     "enabled": true
@@ -14,7 +16,7 @@
     {
       "binding": "DB",
       "database_name": "retrospective-db",
-      "database_id": "local"
+      "database_id": "a909c5f0-807c-464a-89a3-2cab7023f1fe"
     }
   ]
 }

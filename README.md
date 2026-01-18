@@ -7,14 +7,49 @@ A minimal retrospective board with four columns: **Glad** (what went well), **Wo
 ```bash
 pnpm install
 pnpm dev           # Local dev with wrangler D1
-pnpm build         # Build for production
-pnpm deploy        # Deploy to Cloudflare Pages
 ```
 
-Set up D1 database:
+## Database Setup
+
+### For Production
+
+Create and configure the D1 database:
 
 ```bash
-npx wrangler d1 create retro-db
-npx wrangler d1 migrations apply retrospective-db --local   # For local dev
-npx wrangler d1 migrations apply retrospective-db --remote  # For production
+# Create the database
+npx wrangler d1 create retrospective-db
+
+# Copy the database_id from the output and update wrangler.jsonc
+# Replace "your-database-id-here" with the actual database_id
+
+# Apply migrations
+npx wrangler d1 migrations apply retrospective-db --remote
 ```
+
+### For Local Development
+
+For local testing, use a local D1 database:
+
+```bash
+# Apply migrations to local database
+npx wrangler d1 migrations apply retrospective-db --local
+
+# Run dev server (automatically uses local D1)
+pnpm dev
+```
+
+The local D1 database is stored in `.wrangler/state` and doesn't require a database_id in the config.
+
+## Deployment
+
+Build and deploy to Cloudflare Workers:
+
+```bash
+# Build the application
+pnpm build
+
+# Deploy to Cloudflare Workers
+npx wrangler deploy
+```
+
+The app will be deployed to your Cloudflare Workers subdomain at `https://retrospective.<your-subdomain>.workers.dev`
