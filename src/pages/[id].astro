@@ -1,0 +1,24 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Board from '../components/Board.tsx';
+
+const { id } = Astro.params;
+
+// Basic validation for UUID format
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+if (!id || !uuidRegex.test(id)) {
+  return Astro.redirect('/');
+}
+
+// Create a session object from the URL parameter
+// The actual session data will be loaded client-side from localStorage
+const session = {
+  id,
+  name: 'Loading...',
+  created_at: new Date().toISOString(),
+};
+---
+
+<Layout title="Retro Board">
+  <Board session={session} client:load />
+</Layout>
