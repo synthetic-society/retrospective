@@ -3,6 +3,9 @@
   "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2026-01-18",
   "compatibility_flags": ["nodejs_compat"],
+  "routes": [
+    { "pattern": "retrospective.rocher.lc", "custom_domain": true }
+  ],
   "assets": {
     "binding": "ASSETS",
     "directory": "./dist",
