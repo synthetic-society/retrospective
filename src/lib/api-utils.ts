@@ -1,39 +1,32 @@
 import type { ZodError } from 'zod';
+import { UUIDSchema, MAX_REQUEST_BODY_SIZE } from './schemas';
 
-// Utility functions for API responses
+// Response helpers
+export const jsonResponse = (data: unknown, status = 200) =>
+  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
 
-export const jsonResponse = (data: any, status = 200) =>
-  new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
+export const errorResponse = (message: string, status = 400) => jsonResponse({ error: { message, status } }, status);
 
-// Error codes for consistent error handling
-export type ErrorCode =
-  | 'BAD_REQUEST'
-  | 'NOT_FOUND'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'CONFLICT'
-  | 'RATE_LIMITED'
-  | 'VALIDATION_ERROR';
-
-export const errorResponse = (message: string, status = 400, code?: ErrorCode) =>
-  jsonResponse(
-    {
-      error: {
-        message,
-        code: code || (status === 404 ? 'NOT_FOUND' : 'BAD_REQUEST'),
-        status,
-      },
-    },
-    status
-  );
-
-// Helper to format Zod validation errors
 export const zodErrorResponse = (error: ZodError) =>
-  errorResponse(error.issues[0]?.message || 'Validation failed', 400, 'VALIDATION_ERROR');
+  errorResponse(error.issues[0]?.message || 'Validation failed', 400);
 
-// Rate limit error response
-export const rateLimitResponse = () =>
-  errorResponse('Rate limit exceeded. Please try again later.', 429, 'RATE_LIMITED');
+// Validation helpers
+export const validateUUID = (id: string | undefined): id is string => !!id && UUIDSchema.safeParse(id).success;
+
+export const isSessionExpired = (expiresAt: string | null | undefined) =>
+  !!expiresAt && new Date(expiresAt) < new Date();
+
+// Parse JSON body with size limit
+export async function parseJsonBody(request: Request): Promise<{ data?: unknown; error?: Response }> {
+  const len = request.headers.get('content-length');
+  if (len && parseInt(len, 10) > MAX_REQUEST_BODY_SIZE) {
+    return { error: errorResponse('Request body too large', 413) };
+  }
+  try {
+    const text = await request.text();
+    if (text.length > MAX_REQUEST_BODY_SIZE) return { error: errorResponse('Request body too large', 413) };
+    return { data: JSON.parse(text) };
+  } catch {
+    return { error: errorResponse('Invalid JSON body') };
+  }
+}

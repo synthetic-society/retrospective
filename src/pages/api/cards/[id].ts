@@ -1,60 +1,39 @@
 import type { APIContext } from 'astro';
-import { jsonResponse, errorResponse, zodErrorResponse } from '../../../lib/api-utils';
+import { jsonResponse, errorResponse, zodErrorResponse, validateUUID, parseJsonBody } from '../../../lib/api-utils';
 import { getDB } from '../../../lib/db';
 import { UpdateCardSchema } from '../../../lib/schemas';
 
-// PATCH /api/cards/[id] - Update a card
 export async function PATCH({ params, request, locals }: APIContext) {
-  const db = getDB(locals);
   const { id } = params;
-  const body = await request.json();
+  if (!validateUUID(id)) return errorResponse('Invalid card ID', 400);
 
-  // Check if card exists first
-  const existing = await db.prepare('SELECT id FROM cards WHERE id = ?').bind(id).first();
-  if (!existing) {
-    return errorResponse('Card not found', 404);
-  }
+  const { data: body, error } = await parseJsonBody(request);
+  if (error) return error;
 
-  // Validate input with Zod
   const parsed = UpdateCardSchema.safeParse(body);
-  if (!parsed.success) {
-    return zodErrorResponse(parsed.error);
-  }
+  if (!parsed.success) return zodErrorResponse(parsed.error);
 
-  const updates = parsed.data;
-  const fields: string[] = [];
-  const values: any[] = [];
+  const db = getDB(locals);
+  const existing = await db.prepare('SELECT id FROM cards WHERE id = ?').bind(id).first();
+  if (!existing) return errorResponse('Card not found', 404);
 
-  if (updates.content !== undefined) {
-    fields.push('content = ?');
-    values.push(updates.content);
-  }
-  if (updates.column_type !== undefined) {
-    fields.push('column_type = ?');
-    values.push(updates.column_type);
-  }
+  const { content, column_type } = parsed.data;
+  const sets = [content !== undefined && 'content = ?', column_type !== undefined && 'column_type = ?'].filter(Boolean);
+  if (!sets.length) return errorResponse('No fields to update');
 
-  if (fields.length === 0) {
-    return errorResponse('No valid fields to update');
-  }
-
-  values.push(id);
+  const values = [content, column_type].filter(v => v !== undefined);
   await db
-    .prepare(`UPDATE cards SET ${fields.join(', ')} WHERE id = ?`)
-    .bind(...values)
+    .prepare(`UPDATE cards SET ${sets.join(', ')} WHERE id = ?`)
+    .bind(...values, id)
     .run();
 
-  const result = await db.prepare('SELECT * FROM cards WHERE id = ?').bind(id).first();
-
-  return jsonResponse(result);
+  return jsonResponse(await db.prepare('SELECT * FROM cards WHERE id = ?').bind(id).first());
 }
 
-// DELETE /api/cards/[id] - Delete a card
 export async function DELETE({ params, locals }: APIContext) {
-  const db = getDB(locals);
   const { id } = params;
+  if (!validateUUID(id)) return errorResponse('Invalid card ID', 400);
 
-  await db.prepare('DELETE FROM cards WHERE id = ?').bind(id).run();
-
+  await getDB(locals).prepare('DELETE FROM cards WHERE id = ?').bind(id).run();
   return new Response(null, { status: 204 });
 }

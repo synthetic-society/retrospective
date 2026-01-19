@@ -7,7 +7,11 @@ import { useCreateSession, createQueryClient } from '../lib/queries';
 
 export default function Home() {
   const qc = useRef(createQueryClient());
-  return <QueryClientProvider client={qc.current}><HomeContent /></QueryClientProvider>;
+  return (
+    <QueryClientProvider client={qc.current}>
+      <HomeContent />
+    </QueryClientProvider>
+  );
 }
 
 function HomeContent() {
@@ -15,7 +19,9 @@ function HomeContent() {
   const [name, setName] = useState('');
   const create = useCreateSession();
 
-  useEffect(() => { setSessions(getSessionHistory()); }, []);
+  useEffect(() => {
+    setSessions(getSessionHistory());
+  }, []);
 
   const handleCreate = async (e: Event) => {
     e.preventDefault();
@@ -35,18 +41,31 @@ function HomeContent() {
     <div class="min-h-screen flex items-center justify-center p-4">
       <div class="w-full max-w-lg">
         <div class="text-center mb-8">
-          <h1 class="text-2xl md:text-3xl font-semibold text-sketch-dark mb-2 tracking-wider hand-drawn">~ Retrospective ~</h1>
+          <h1 class="text-2xl md:text-3xl font-semibold text-sketch-dark mb-2 tracking-wider hand-drawn">
+            ~ Retrospective ~
+          </h1>
           <div class="text-sketch-medium text-sm hand-drawn">═══════════════════════════════════</div>
         </div>
 
         <form onSubmit={handleCreate} class="mb-10">
           <div class="border-2 border-sketch-dark bg-white/60 p-4 rounded hand-drawn">
-            <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider hand-drawn">Session Name:</label>
+            <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider hand-drawn">
+              Session Name:
+            </label>
             <div class="flex gap-2">
-              <input type="text" value={name} onInput={e => setName((e.target as HTMLInputElement).value)} placeholder="Sprint 42 Retro"
-                class="input flex-1 font-mono text-sm hand-drawn" disabled={create.isPending} />
-              <button type="submit" disabled={!name.trim() || create.isPending}
-                class="btn-primary btn-md font-mono uppercase tracking-wider hand-drawn">
+              <input
+                type="text"
+                value={name}
+                onInput={e => setName((e.target as HTMLInputElement).value)}
+                placeholder="Sprint 42 Retro"
+                class="input flex-1 font-mono text-sm hand-drawn"
+                disabled={create.isPending}
+              />
+              <button
+                type="submit"
+                disabled={!name.trim() || create.isPending}
+                class="btn-primary btn-md font-mono uppercase tracking-wider hand-drawn"
+              >
                 {create.isPending ? '...' : 'Create'}
               </button>
             </div>
@@ -54,18 +73,37 @@ function HomeContent() {
         </form>
 
         <div>
-          <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest hand-drawn">─── Previous Sessions ───</div>
+          <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest hand-drawn">
+            ─── Previous Sessions ───
+          </div>
           {sessions.length === 0 ? (
-            <div class="text-center text-sketch-medium italic py-8 border-2 border-dashed border-sketch-medium rounded hand-drawn">(No sessions yet? Create one above!)</div>
+            <div class="text-center text-sketch-medium italic py-8 border-2 border-dashed border-sketch-medium rounded hand-drawn">
+              (No sessions yet? Create one above!)
+            </div>
           ) : (
             <div class="space-y-2">
               {sessions.map(s => (
-                <a key={s.id} href={`/${s.id}`} class="group block border-2 border-sketch-dark bg-white/60 hover:bg-white hover:border-sketch-dark transition-all rounded p-3 hand-drawn cursor-pointer">
+                <a
+                  key={s.id}
+                  href={`/${s.id}`}
+                  class="group block border-2 border-sketch-dark bg-white/60 hover:bg-white hover:border-sketch-dark transition-all rounded p-3 hand-drawn cursor-pointer"
+                >
                   <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-sketch-dark"><span>▸</span><span class="font-medium">{s.name}</span></div>
-                    <button onClick={e => handleRemove(s.id, e)} class="text-sketch-medium hover:text-sketch-dark transition-colors px-2 cursor-pointer" title="Remove">×</button>
+                    <div class="flex items-center gap-2 text-sketch-dark">
+                      <span>▸</span>
+                      <span class="font-medium">{s.name}</span>
+                    </div>
+                    <button
+                      onClick={e => handleRemove(s.id, e)}
+                      class="text-sketch-medium hover:text-sketch-dark transition-colors px-2 cursor-pointer"
+                      title="Remove"
+                    >
+                      ×
+                    </button>
                   </div>
-                  <div class="text-sketch-medium text-xs mt-1 ml-5">{format(new Date(s.created_at), 'yyyy.MM.dd // HH:mm')}</div>
+                  <div class="text-sketch-medium text-xs mt-1 ml-5">
+                    {format(new Date(s.created_at), 'yyyy.MM.dd // HH:mm')}
+                  </div>
                 </a>
               ))}
             </div>

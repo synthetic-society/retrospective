@@ -16,9 +16,7 @@ export default function VoteButton({ votes, hasVoted, onClick }: VoteButtonProps
       <svg
         viewBox="0 0 24 24"
         class={`absolute inset-0 w-full h-full transition-all ${
-          hasVoted
-            ? 'fill-sketch-dark stroke-sketch-dark'
-            : 'fill-none stroke-sketch-medium hover:stroke-sketch-dark'
+          hasVoted ? 'fill-sketch-dark stroke-sketch-dark' : 'fill-none stroke-sketch-medium hover:stroke-sketch-dark'
         }`}
         style="stroke-width: 2px; filter: url(#handDrawnNoise);"
       >
