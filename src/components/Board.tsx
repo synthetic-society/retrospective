@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { Card, ColumnType, Session } from '../lib/store';
+import { getSessionHistory } from '../lib/store';
 import { createQueryClient, useCards, useVotes, useAddCard, useUpdateCard, useDeleteCard, useToggleVote } from '../lib/queries';
 import { MAX_CARD_CONTENT_LENGTH } from '../lib/schemas';
 import VoteButton from './VoteButton';
@@ -37,12 +38,19 @@ export default function Board({ session }: { session: Session }) {
   );
 }
 
-function BoardContent({ session }: { session: Session }) {
+function BoardContent({ session: initialSession }: { session: Session }) {
   const [expandedColumn, setExpandedColumn] = useState<ColumnType | null>('glad');
   const [copied, setCopied] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [addingTo, setAddingTo] = useState<ColumnType | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Load actual session name from localStorage
+  const [session, setSession] = useState<Session>(initialSession);
+  useEffect(() => {
+    const stored = getSessionHistory().find(s => s.id === initialSession.id);
+    if (stored) setSession(stored);
+  }, [initialSession.id]);
 
   const { data: cards = [], isLoading } = useCards(session.id);
   const { data: votedIds = new Set<string>() } = useVotes(session.id);
@@ -107,12 +115,12 @@ function BoardContent({ session }: { session: Session }) {
         <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">← Back</a>
         <h1 class="text-sketch-dark font-medium truncate mx-4 hand-drawn">{session.name}</h1>
         <div class="flex gap-2">
-          <button onClick={toggleMusic} class="text-sm border-2 border-sketch-dark text-sketch-dark px-2 py-1 rounded hover:bg-sketch-dark hover:text-beige-light transition-all hand-drawn cursor-pointer" title={isPlaying ? 'Pause' : 'Play'}>
+          <button onClick={toggleMusic} class="btn-primary btn-sm hand-drawn" title={isPlaying ? 'Pause' : 'Play'}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="15 10 70 70" class="w-4 h-4 inline-block" fill="currentColor">
               <path d="m35 14c-1.0625 0.23828-1.9766 1.0977-2 2v49.094c-2.1289-1.9141-4.9297-3.0938-8-3.0938-6.6055 0-12 5.3945-12 12s5.3945 12 12 12 12-5.3945 12-12v-40h46v25.094c-2.1289-1.9141-4.9297-3.0938-8-3.0938-6.6055 0-12 5.3945-12 12s5.3945 12 12 12 12-5.3945 12-12v-52c0-1.0469-0.95312-2-2-2z"/>
             </svg>
           </button>
-          <button onClick={handleShare} class="text-sm border-2 border-sketch-dark text-sketch-dark px-3 py-1 rounded hover:bg-sketch-dark hover:text-beige-light transition-all hand-drawn cursor-pointer">
+          <button onClick={handleShare} class="btn-primary btn-sm hand-drawn">
             {copied ? 'Copied!' : 'Share'}
           </button>
         </div>

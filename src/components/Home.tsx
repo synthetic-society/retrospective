@@ -44,9 +44,9 @@ function HomeContent() {
             <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider hand-drawn">Session Name:</label>
             <div class="flex gap-2">
               <input type="text" value={name} onInput={e => setName((e.target as HTMLInputElement).value)} placeholder="Sprint 42 Retro"
-                class="flex-1 bg-white border-2 border-sketch-medium text-sketch-dark px-3 py-2 rounded font-mono text-sm focus:border-sketch-dark focus:outline-none transition-all hand-drawn" disabled={create.isPending} />
+                class="input flex-1 font-mono text-sm hand-drawn" disabled={create.isPending} />
               <button type="submit" disabled={!name.trim() || create.isPending}
-                class="px-4 py-2 border-2 border-sketch-dark text-sketch-dark font-mono text-sm uppercase tracking-wider hover:bg-sketch-dark hover:text-beige-light transition-all disabled:opacity-50 disabled:cursor-not-allowed rounded hand-drawn cursor-pointer">
+                class="btn-primary btn-md font-mono uppercase tracking-wider hand-drawn">
                 {create.isPending ? '...' : 'Create'}
               </button>
             </div>
