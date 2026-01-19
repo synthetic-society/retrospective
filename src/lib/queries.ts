@@ -6,9 +6,22 @@ import { getClientId, addToSessionHistory } from './store';
 const api = ky.extend({ prefixUrl: '/api', timeout: 10000 });
 
 export const queryKeys = {
+  session: (sessionId: string) => ['session', sessionId] as const,
   cards: (sessionId: string) => ['cards', sessionId] as const,
   votes: (sessionId: string, clientId: string) => ['votes', sessionId, clientId] as const,
 };
+
+export const useSession = (sessionId: string, initialData?: Session) =>
+  useQuery({
+    queryKey: queryKeys.session(sessionId),
+    queryFn: async () => {
+      const session = await api.get(`sessions/${sessionId}`).json<Session>();
+      addToSessionHistory(session);
+      return session;
+    },
+    initialData,
+    staleTime: 30000, // Session data doesn't change often
+  });
 
 export const createQueryClient = () =>
   new QueryClient({

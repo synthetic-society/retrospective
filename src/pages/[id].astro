@@ -1,6 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Board from '../components/Board.tsx';
+import { getDB } from '../lib/db';
 
 const { id } = Astro.params;
 
@@ -10,15 +11,38 @@ if (!id || !uuidRegex.test(id)) {
   return Astro.redirect('/');
 }
 
-// Create a session object from the URL parameter
-// The actual session data will be loaded client-side from localStorage
-const session = {
-  id,
-  name: 'Loading...',
-  created_at: new Date().toISOString(),
-};
+// Fetch session from database for SSR meta tags
+// Client will also fetch via API and update the UI
+let sessionName = 'Retrospective Session';
+let sessionCreatedAt = new Date().toISOString();
+try {
+  const db = getDB(Astro.locals);
+  const result = await db
+    .prepare('SELECT name, created_at FROM sessions WHERE id = ?')
+    .bind(id)
+    .first<{ name: string; created_at: string }>();
+  if (result) {
+    sessionName = result.name;
+    sessionCreatedAt = result.created_at;
+  }
+} catch {
+  // Fall back to defaults if DB is unavailable
+}
+
+// Build canonical URL for this session
+const canonicalUrl = new URL(`/${id}`, Astro.site || Astro.url.origin).href;
+
+// Session object passed to client - serves as initial data for React Query
+const session = { id, name: sessionName, created_at: sessionCreatedAt };
 ---
 
-<Layout title="Retro Board">
+<Layout
+  title={`${sessionName} | retrospective board`}
+  description="Join this retrospective session to share feedback collectively and anonymously."
+  ogTitle={sessionName}
+  ogDescription="Join this retrospective session to share feedback collectively and anonymously."
+  ogType="article"
+  canonicalUrl={canonicalUrl}
+>
   <Board session={session} client:only="preact" />
 </Layout>

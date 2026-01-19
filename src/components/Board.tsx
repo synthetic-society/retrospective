@@ -1,8 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { Card, ColumnType, Session } from '../lib/store';
-import { getSessionHistory } from '../lib/store';
-import { createQueryClient, useCards, useVotes } from '../lib/queries';
+import { createQueryClient, useSession, useCards, useVotes } from '../lib/queries';
 import { AddCard, CardItem } from './Card';
 
 const COLUMNS: { type: ColumnType; title: string; placeholder: string }[] = [
@@ -28,11 +27,7 @@ function BoardContent({ session: initialSession }: { session: Session }) {
   const [addingTo, setAddingTo] = useState<ColumnType | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const [session, setSession] = useState(initialSession);
-  useEffect(() => {
-    const stored = getSessionHistory().find(s => s.id === initialSession.id);
-    if (stored) setSession(stored);
-  }, [initialSession.id]);
+  const { data: session = initialSession } = useSession(initialSession.id, initialSession);
 
   const { data: cards = [], isLoading } = useCards(session.id);
   const { data: votedIds = new Set<string>() } = useVotes(session.id);

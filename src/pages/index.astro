@@ -1,9 +1,17 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Home from '../components/Home.tsx';
+
+const canonicalUrl = new URL('/', Astro.site || Astro.url.origin).href;
 ---
 
-<Layout title="retro://spective">
+<Layout
+  title="retro://spective"
+  description="Create and share real-time retrospective boards with your team. Organize feedback into feedback and action columns."
+  ogTitle="retrospective - Team Retrospective Board"
+  ogDescription="Create and share real-time retrospective boards with your team. Collect feedback, vote on items, and collaborate on actions."
+  canonicalUrl={canonicalUrl}
+>
   <Home client:only="preact" />
 </Layout>
 
