@@ -6,6 +6,31 @@ import VoteButton from './VoteButton';
 
 const sanitizeInput = (text: string) => text.replace(/<[^>]*>/g, '').substring(0, MAX_CARD_CONTENT_LENGTH);
 
+// Preserve cursor position when modifying contenteditable content
+const sanitizeWithCursor = (el: HTMLElement) => {
+  const text = el.textContent || '';
+  const sanitized = sanitizeInput(text);
+  if (text === sanitized) return sanitized;
+
+  // Save cursor position
+  const sel = window.getSelection();
+  const offset = sel?.focusOffset ?? text.length;
+
+  // Update content
+  el.textContent = sanitized;
+
+  // Restore cursor (clamped to new length)
+  if (sel && el.firstChild) {
+    const newOffset = Math.min(offset, sanitized.length);
+    const range = document.createRange();
+    range.setStart(el.firstChild, newOffset);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  return sanitized;
+};
+
 const handlePaste = (e: ClipboardEvent) => {
   e.preventDefault();
   document.execCommand('insertText', false, sanitizeInput(e.clipboardData?.getData('text/plain') || ''));
@@ -44,8 +69,7 @@ export function AddCard({
 
   const handleInput = (e: Event) => {
     const el = e.target as HTMLSpanElement;
-    const sanitized = sanitizeInput(el.textContent || '');
-    if (el.textContent !== sanitized) el.textContent = sanitized;
+    const sanitized = sanitizeWithCursor(el);
     setContent(sanitized);
   };
 
@@ -135,8 +159,7 @@ export function CardItem({
 
   const handleChange = (e: Event) => {
     const el = e.target as HTMLSpanElement;
-    const sanitized = sanitizeInput(el.textContent || '');
-    if (el.textContent !== sanitized) el.textContent = sanitized;
+    const sanitized = sanitizeWithCursor(el);
     setContent(sanitized);
     save(card.id, sanitized);
   };
