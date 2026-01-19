@@ -103,17 +103,29 @@ function BoardContent({ session: initialSession }: { session: Session }) {
         </a>
         <h1 class="text-sketch-dark font-medium truncate mx-4 hand-drawn">{session.name}</h1>
         <div class="flex gap-2">
-          <button onClick={toggleMusic} class="btn-primary btn-sm hand-drawn" title={isPlaying ? 'Pause' : 'Play'}>
+          <button
+            onClick={toggleMusic}
+            class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            title={isPlaying ? 'Pause background music' : 'Play background music'}
+            aria-label={isPlaying ? 'Pause background music' : 'Play background music'}
+            aria-pressed={isPlaying}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="15 10 70 70"
               class="w-4 h-4 inline-block"
               fill="currentColor"
+              aria-hidden="true"
             >
               <path d="m35 14c-1.0625 0.23828-1.9766 1.0977-2 2v49.094c-2.1289-1.9141-4.9297-3.0938-8-3.0938-6.6055 0-12 5.3945-12 12s5.3945 12 12 12 12-5.3945 12-12v-40h46v25.094c-2.1289-1.9141-4.9297-3.0938-8-3.0938-6.6055 0-12 5.3945-12 12s5.3945 12 12 12 12-5.3945 12-12v-52c0-1.0469-0.95312-2-2-2z" />
             </svg>
           </button>
-          <button onClick={handleShare} class="btn-primary btn-sm hand-drawn">
+          <button
+            onClick={handleShare}
+            class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            aria-label={copied ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
+            aria-live="polite"
+          >
             {copied ? 'Copied!' : 'Share'}
           </button>
         </div>

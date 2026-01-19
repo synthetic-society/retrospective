@@ -8,8 +8,10 @@ export default function VoteButton({ votes, hasVoted, onClick }: VoteButtonProps
   return (
     <button
       onClick={onClick}
-      class="relative font-mono transition-all hand-drawn cursor-pointer active:animate-[heartBounce_0.4s_ease-in-out]"
+      class="relative font-mono transition-all hand-drawn cursor-pointer active:animate-[heartBounce_0.4s_ease-in-out] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2 rounded-full"
       title={hasVoted ? 'Remove vote' : 'Vote'}
+      aria-label={hasVoted ? `Remove vote, currently ${votes} votes` : `Vote, currently ${votes} votes`}
+      aria-pressed={hasVoted}
       style="width: 40px; height: 40px;"
     >
       {/* Heart SVG */}
