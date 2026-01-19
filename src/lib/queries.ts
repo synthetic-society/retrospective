@@ -22,6 +22,7 @@ export const useCards = (sessionId: string) =>
     queryKey: queryKeys.cards(sessionId),
     queryFn: () => api.get(`sessions/${sessionId}/cards`).json<Card[]>(),
     refetchInterval: 3000,
+    refetchIntervalInBackground: false, // Pause polling when tab is hidden
   });
 
 export const useVotes = (sessionId: string) => {
@@ -30,6 +31,7 @@ export const useVotes = (sessionId: string) => {
     queryKey: queryKeys.votes(sessionId, clientId),
     queryFn: () => api.get(`sessions/${sessionId}/votes?voter_id=${clientId}`).json<string[]>(),
     refetchInterval: 3000,
+    refetchIntervalInBackground: false, // Pause polling when tab is hidden
     select: (data) => new Set(data || []),
   });
 };
