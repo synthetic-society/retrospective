@@ -34,7 +34,7 @@ export async function GET({ params, url, locals }: APIContext) {
     .prepare('SELECT * FROM cards WHERE session_id = ? ORDER BY created_at ASC LIMIT ?')
     .bind(id, parseLimit(url.searchParams.get('limit')))
     .all();
-  return jsonResponse(result.results || []);
+  return jsonResponse(result.results || [], 200, 1); // 1s cache with stale-while-revalidate
 }
 
 export async function POST({ params, request, locals }: APIContext) {

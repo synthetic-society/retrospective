@@ -13,5 +13,5 @@ export async function GET({ params, locals }: APIContext) {
   if (!result) return errorResponse('Session not found', 404);
   if (isSessionExpired(result.expires_at)) return errorResponse('Session expired', 410);
 
-  return jsonResponse(result);
+  return jsonResponse(result, 200, 1); // 1s cache with stale-while-revalidate
 }

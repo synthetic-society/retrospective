@@ -49,6 +49,9 @@ const finalOgDescription = ogDescription || description;
     <meta name="twitter:description" content={finalOgDescription} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
+    <!-- Preload font -->
+    <link rel="preload" href="/_astro/ibm-plex-mono-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
+
     <title>{title}</title>
   </head>
   <body class="font-mono text-sketch-dark min-h-screen" style="background-color: #f5f0e8;">

@@ -2,8 +2,16 @@ import type { ZodError } from 'zod';
 import { UUIDSchema, MAX_REQUEST_BODY_SIZE } from './schemas';
 
 // Response helpers
-export const jsonResponse = (data: unknown, status = 200) =>
-  new Response(JSON.stringify(data), { status, headers: { 'Content-Type': 'application/json' } });
+export const jsonResponse = (data: unknown, status = 200, cacheSeconds = 0) =>
+  new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(cacheSeconds > 0 && {
+        'Cache-Control': `public, max-age=${cacheSeconds}, stale-while-revalidate=${cacheSeconds * 2}`,
+      }),
+    },
+  });
 
 export const errorResponse = (message: string, status = 400) => jsonResponse({ error: { message, status } }, status);
 
