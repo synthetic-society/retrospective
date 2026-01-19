@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MAX_CARD_CONTENT_LENGTH } from './constants';
 
 // Shared helpers
 const trimmedString = (max: number) =>
@@ -17,16 +18,10 @@ export type ColumnType = z.infer<typeof ColumnTypeSchema>;
 export const CreateSessionSchema = z.object({ name: trimmedString(100) });
 export const CreateCardSchema = z.object({
   column_type: ColumnTypeSchema,
-  content: trimmedString(500),
+  content: trimmedString(MAX_CARD_CONTENT_LENGTH),
 });
 export const UpdateCardSchema = z.object({
-  content: trimmedString(500).optional(),
+  content: trimmedString(MAX_CARD_CONTENT_LENGTH).optional(),
   column_type: ColumnTypeSchema.optional(),
 });
 export const VoteSchema = z.object({ voter_id: UUIDSchema });
-
-// Limits
-export const MAX_CARD_CONTENT_LENGTH = 500;
-export const MAX_PAGE_LIMIT = 500;
-export const DEFAULT_PAGE_LIMIT = 100;
-export const MAX_REQUEST_BODY_SIZE = 16 * 1024;

@@ -1,9 +1,19 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { format } from 'date-fns';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { Session } from '../lib/store';
 import { getSessionHistory, removeFromSessionHistory } from '../lib/store';
 import { useCreateSession, createQueryClient } from '../lib/queries';
+
+// Native date formatter
+const formatDate = (dateStr: string) => {
+  return new Intl.DateTimeFormat('default', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(dateStr));
+};
 
 export default function Home() {
   const qc = useRef(createQueryClient());
@@ -102,7 +112,7 @@ function HomeContent() {
                     </button>
                   </div>
                   <div class="text-sketch-medium text-xs mt-1 ml-5">
-                    {format(new Date(s.created_at), 'yyyy.MM.dd // HH:mm')}
+                    {formatDate(s.created_at)}
                   </div>
                 </a>
               ))}

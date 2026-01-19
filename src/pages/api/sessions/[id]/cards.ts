@@ -8,7 +8,8 @@ import {
   parseJsonBody,
 } from '../../../../lib/api-utils';
 import { getDB } from '../../../../lib/db';
-import { CreateCardSchema, DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/schemas';
+import { CreateCardSchema } from '../../../../lib/schemas';
+import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/constants';
 
 type Session = { id: string; expires_at?: string };
 

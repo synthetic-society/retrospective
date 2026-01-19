@@ -1,5 +1,6 @@
 import type { ZodError } from 'zod';
-import { UUIDSchema, MAX_REQUEST_BODY_SIZE } from './schemas';
+import { UUIDSchema } from './schemas';
+import { MAX_REQUEST_BODY_SIZE } from './constants';
 
 // Response helpers
 export const jsonResponse = (data: unknown, status = 200, cacheSeconds = 0) =>

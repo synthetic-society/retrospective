@@ -7,7 +7,8 @@ import {
   isSessionExpired,
 } from '../../../../lib/api-utils';
 import { getDB } from '../../../../lib/db';
-import { VoteSchema, DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/schemas';
+import { VoteSchema } from '../../../../lib/schemas';
+import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/constants';
 
 export async function GET({ params, url, locals }: APIContext) {
   const { id: session_id } = params;
@@ -30,9 +31,9 @@ export async function GET({ params, url, locals }: APIContext) {
   );
   const result = await db
     .prepare(
-      `SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ?`
+      `SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ${limit}`
     )
-    .bind(session_id, parsed.data.voter_id, limit)
+    .bind(session_id, parsed.data.voter_id)
     .all();
 
   return jsonResponse((result.results || []).map((r: any) => r.card_id), 200, 1); // 1s cache with stale-while-revalidate

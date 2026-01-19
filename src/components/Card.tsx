@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
 import type { Card, ColumnType } from '../lib/store';
 import { useAddCard, useUpdateCard, useDeleteCard, useToggleVote } from '../lib/queries';
-import { MAX_CARD_CONTENT_LENGTH } from '../lib/schemas';
+import { MAX_CARD_CONTENT_LENGTH } from '../lib/constants';
 import VoteButton from './VoteButton';
 
 const sanitizeInput = (text: string) => text.replace(/<[^>]*>/g, '').substring(0, MAX_CARD_CONTENT_LENGTH);
