@@ -7,7 +7,7 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   output: 'server',
-  integrations: [preact()],
+  integrations: [preact({ compat: true })],
 
   vite: {
     plugins: [tailwindcss()],
