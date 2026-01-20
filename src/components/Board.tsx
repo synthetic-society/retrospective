@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
+import { useRef, useEffect } from 'preact/hooks';
+import { signal } from '@preact/signals';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { Card, ColumnType, Session } from '../lib/store';
 import { createQueryClient, useSession, useCards, useVotes } from '../lib/queries';
@@ -20,11 +21,13 @@ export default function Board({ session }: { session: Session }) {
   );
 }
 
+const expandedColumn = signal<ColumnType | null>('glad');
+const copied = signal(false);
+const isPlaying = signal(false);
+const addingTo = signal<ColumnType | null>(null);
+const animating = signal(new Map<string, 'up' | 'down'>());
+
 function BoardContent({ session: initialSession }: { session: Session }) {
-  const [expandedColumn, setExpandedColumn] = useState<ColumnType | null>('glad');
-  const [copied, setCopied] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [addingTo, setAddingTo] = useState<ColumnType | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const { data: session = initialSession } = useSession(initialSession.id, initialSession);
@@ -33,20 +36,16 @@ function BoardContent({ session: initialSession }: { session: Session }) {
   const { data: votedIds = new Set<string>() } = useVotes(session.id);
 
   const prevPositions = useRef(new Map<string, { column: ColumnType; index: number }>());
-  const [animating, setAnimating] = useState(new Map<string, 'up' | 'down'>());
 
-  const getPositions = useCallback(
-    (list: Card[]) =>
-      new Map(
-        COLUMNS.flatMap(col =>
-          list
-            .filter(c => c.column_type === col.type)
-            .sort((a, b) => b.votes - a.votes)
-            .map((card, i) => [card.id, { column: col.type, index: i }] as const)
-        )
-      ),
-    []
-  );
+  const getPositions = (list: Card[]) =>
+    new Map(
+      COLUMNS.flatMap(col =>
+        list
+          .filter(c => c.column_type === col.type)
+          .sort((a, b) => b.votes - a.votes)
+          .map((card, i) => [card.id, { column: col.type, index: i }] as const)
+      )
+    );
 
   useEffect(() => {
     if (!cards.length) return;
@@ -61,22 +60,22 @@ function BoardContent({ session: initialSession }: { session: Session }) {
       })
     );
     if (anims.size) {
-      setAnimating(anims);
-      setTimeout(() => setAnimating(new Map()), 400);
+      animating.value = anims;
+      setTimeout(() => (animating.value = new Map()), 400);
     }
     prevPositions.current = newPos;
-  }, [cards, getPositions]);
+  }, [cards]);
 
   const handleShare = async () => {
     await navigator.clipboard.writeText(window.location.href);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    copied.value = true;
+    setTimeout(() => (copied.value = false), 2000);
   };
 
   const toggleMusic = () => {
     audioRef.current ??= Object.assign(new Audio('/kimiko-ishizaka-open-goldberg-variations-26.ogg'), { loop: true });
-    isPlaying ? audioRef.current.pause() : audioRef.current.play().catch(console.error);
-    setIsPlaying(!isPlaying);
+    isPlaying.value ? audioRef.current.pause() : audioRef.current.play().catch(console.error);
+    isPlaying.value = !isPlaying.value;
   };
 
   const getColumnCards = (type: ColumnType) =>
@@ -101,9 +100,9 @@ function BoardContent({ session: initialSession }: { session: Session }) {
           <button
             onClick={toggleMusic}
             class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
-            title={isPlaying ? 'Pause background music' : 'Play background music'}
-            aria-label={isPlaying ? 'Pause background music' : 'Play background music'}
-            aria-pressed={isPlaying}
+            title={isPlaying.value ? 'Pause background music' : 'Play background music'}
+            aria-label={isPlaying.value ? 'Pause background music' : 'Play background music'}
+            aria-pressed={isPlaying.value}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -118,10 +117,10 @@ function BoardContent({ session: initialSession }: { session: Session }) {
           <button
             onClick={handleShare}
             class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
-            aria-label={copied ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
+            aria-label={copied.value ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
             aria-live="polite"
           >
-            {copied ? 'Copied!' : 'Share'}
+            {copied.value ? 'Copied!' : 'Share'}
           </button>
         </div>
       </header>
@@ -129,11 +128,11 @@ function BoardContent({ session: initialSession }: { session: Session }) {
       <div class="flex-1 md:grid md:grid-cols-4 md:gap-4 md:p-4 overflow-y-auto">
         {COLUMNS.map(col => {
           const columnCards = getColumnCards(col.type);
-          const isExpanded = expandedColumn === col.type;
+          const isExpanded = expandedColumn.value === col.type;
           return (
             <div key={col.type}>
               <button
-                onClick={() => setExpandedColumn(isExpanded ? null : col.type)}
+                onClick={() => (expandedColumn.value = isExpanded ? null : col.type)}
                 class="md:hidden w-full p-3 flex items-center justify-between bg-white/60 border-l-4 border-b-2 border-sketch-dark hand-drawn cursor-pointer hover:bg-white transition-all mx-2 my-2"
               >
                 <div class="flex items-center gap-2">
@@ -155,7 +154,6 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                     type={col.type}
                     placeholder={col.placeholder}
                     addingTo={addingTo}
-                    setAddingTo={setAddingTo}
                   />
                   {columnCards.map(card => (
                     <CardItem
@@ -163,7 +161,7 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                       card={card}
                       sessionId={session.id}
                       hasVoted={votedIds.has(card.id)}
-                      animation={animating.get(card.id)}
+                      animation={animating.value.get(card.id)}
                     />
                   ))}
                 </div>

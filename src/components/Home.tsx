@@ -6,13 +6,7 @@ import { useCreateSession, createQueryClient } from '../lib/queries';
 
 // Native date formatter
 const formatDate = (dateStr: string) => {
-  return new Intl.DateTimeFormat('default', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(new Date(dateStr));
+  return new Intl.DateTimeFormat('default').format(new Date(dateStr));
 };
 
 export default function Home() {
@@ -111,9 +105,7 @@ function HomeContent() {
                       ×
                     </button>
                   </div>
-                  <div class="text-sketch-medium text-xs mt-1 ml-5">
-                    {formatDate(s.created_at)}
-                  </div>
+                  <div class="text-sketch-medium text-xs mt-1 ml-5">{formatDate(s.created_at)}</div>
                 </a>
               ))}
             </div>

@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'preact/hooks';
+import type { Signal } from '@preact/signals';
 import type { Card, ColumnType } from '../lib/store';
 import { useAddCard, useUpdateCard, useDeleteCard, useToggleVote } from '../lib/queries';
 import { MAX_CARD_CONTENT_LENGTH } from '../lib/constants';
@@ -50,18 +51,16 @@ export function AddCard({
   type,
   placeholder,
   addingTo,
-  setAddingTo,
 }: {
   sessionId: string;
   type: ColumnType;
   placeholder: string;
-  addingTo: ColumnType | null;
-  setAddingTo: (v: ColumnType | null) => void;
+  addingTo: Signal<ColumnType | null>;
 }) {
   const [content, setContent] = useState('');
   const inputRef = useRef<HTMLSpanElement>(null);
   const addCard = useAddCard(sessionId);
-  const isActive = addingTo === type;
+  const isActive = addingTo.value === type;
 
   useEffect(() => {
     if (isActive) inputRef.current?.focus();
@@ -78,19 +77,19 @@ export function AddCard({
     await addCard.mutateAsync({ columnType: type, content: content.trim() });
     setContent('');
     if (inputRef.current) inputRef.current.textContent = '';
-    setAddingTo(null);
+    addingTo.value = null;
   };
 
   const close = () => {
     setContent('');
     if (inputRef.current) inputRef.current.textContent = '';
-    setAddingTo(null);
+    addingTo.value = null;
   };
 
   if (!isActive) {
     return (
       <div
-        onClick={() => setAddingTo(type)}
+        onClick={() => (addingTo.value = type)}
         class="border-2 border-dashed border-sketch-medium rounded p-4 text-sketch-medium italic text-sm hand-drawn cursor-pointer hover:border-sketch-dark hover:text-sketch-dark hover:bg-white/40 transition-all"
       >
         {placeholder}
