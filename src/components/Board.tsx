@@ -149,12 +149,24 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                   </h2>
                 </div>
                 <div class="flex-1 overflow-y-auto p-2 space-y-2">
-                  <AddCard
-                    sessionId={session.id}
-                    type={col.type}
-                    placeholder={col.placeholder}
-                    addingTo={addingTo}
-                  />
+                  {col.type === 'action' && columnCards.length === 0 && addingTo.value !== 'action' ? (
+                    <div
+                      onClick={() => (addingTo.value = 'action')}
+                      class="border-2 border-dashed border-sketch-light/50 rounded p-4 text-sketch-light text-sm hand-drawn cursor-pointer hover:border-sketch-medium hover:text-sketch-medium hover:bg-white/20 transition-all duration-200"
+                    >
+                      <div class="text-center">
+                        <span class="italic">Waiting for everyone to have filled the other columns first…</span>
+                        <span class="block text-xs mt-2 opacity-60">Click to add an action anyway</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <AddCard
+                      sessionId={session.id}
+                      type={col.type}
+                      placeholder={col.placeholder}
+                      addingTo={addingTo}
+                    />
+                  )}
                   {columnCards.map(card => (
                     <CardItem
                       key={card.id}
