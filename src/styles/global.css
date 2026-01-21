@@ -43,6 +43,15 @@
   animation: wobble 3s ease-in-out infinite;
 }
 
+/* Woosh scale effect for buttons */
+.hover-woosh {
+  transition: transform 0.15s ease-out;
+}
+
+.hover-woosh:hover {
+  transform: scale(1.15);
+}
+
 /* Heart bounce animation */
 @keyframes heartBounce {
   0% {

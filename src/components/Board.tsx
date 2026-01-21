@@ -26,6 +26,7 @@ const copied = signal(false);
 const isPlaying = signal(false);
 const addingTo = signal<ColumnType | null>(null);
 const animating = signal(new Map<string, 'up' | 'down'>());
+const fullscreenColumn = signal<ColumnType | null>(null);
 
 function BoardContent({ session: initialSession }: { session: Session }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -66,6 +67,17 @@ function BoardContent({ session: initialSession }: { session: Session }) {
     prevPositions.current = newPos;
   }, [cards]);
 
+  // Close fullscreen view on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && fullscreenColumn.value) {
+        fullscreenColumn.value = null;
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleShare = async () => {
     await navigator.clipboard.writeText(window.location.href);
     copied.value = true;
@@ -89,8 +101,67 @@ function BoardContent({ session: initialSession }: { session: Session }) {
     );
   }
 
+  const fullscreenCol = fullscreenColumn.value ? COLUMNS.find(c => c.type === fullscreenColumn.value) : null;
+  const fullscreenCards = fullscreenColumn.value ? getColumnCards(fullscreenColumn.value) : [];
+
   return (
     <div class="min-h-screen flex flex-col">
+      {/* Fullscreen overlay */}
+      {fullscreenCol && (
+        <div
+          class="fixed inset-0 z-50 bg-beige-light/95 overflow-auto"
+          onClick={() => (fullscreenColumn.value = null)}
+        >
+          <div
+            class="sticky top-0 z-10 bg-beige-light border-b-2 border-sketch-dark p-4 flex items-center justify-between hand-drawn"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold hand-drawn">
+              {fullscreenCol.title} ({fullscreenCards.length})
+            </h2>
+            <button
+              onClick={() => (fullscreenColumn.value = null)}
+              class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+              title="Close fullscreen"
+              aria-label="Close fullscreen"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="w-4 h-4"
+                aria-hidden="true"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+          <div class="p-6" onClick={(e) => e.stopPropagation()}>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {fullscreenCards.map(card => (
+                <CardItem
+                  key={card.id}
+                  card={card}
+                  sessionId={session.id}
+                  hasVoted={votedIds.has(card.id)}
+                  animation={animating.value.get(card.id)}
+                />
+              ))}
+            </div>
+            {fullscreenCards.length === 0 && (
+              <div class="text-center text-sketch-medium italic hand-drawn py-12">
+                No cards in this column yet
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <header class="border-b-2 border-sketch-dark bg-white/40 p-3 flex items-center justify-between hand-drawn">
         <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">
           ← Back
@@ -147,6 +218,29 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                   <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold hand-drawn">
                     {col.title}
                   </h2>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fullscreenColumn.value = col.type;
+                    }}
+                    class="text-sketch-medium hover:text-sketch-dark transition-colors p-1 rounded hover:bg-white/50 hover-woosh"
+                    title={`View ${col.title} fullscreen`}
+                    aria-label={`View ${col.title} fullscreen`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="w-4 h-4"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+                    </svg>
+                  </button>
                 </div>
                 <div class="flex-1 overflow-y-auto p-2 space-y-2">
                   {col.type === 'action' && columnCards.length === 0 && addingTo.value !== 'action' ? (
