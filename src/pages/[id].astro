@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Board from '../components/Board.tsx';
 import { getDB } from '../lib/db';
+import { DEMO_SESSION_ID } from '../lib/constants';
 
 const { id } = Astro.params;
 
@@ -11,22 +12,26 @@ if (!id || !uuidRegex.test(id)) {
   return Astro.redirect('/');
 }
 
+const isDemo = id === DEMO_SESSION_ID;
+
 // Fetch session from database for SSR meta tags
 // Client will also fetch via API and update the UI
-let sessionName = 'Retrospective Session';
+let sessionName = isDemo ? 'Demo Board' : 'Retrospective Session';
 let sessionCreatedAt = new Date().toISOString();
-try {
-  const db = getDB(Astro.locals);
-  const result = await db
-    .prepare('SELECT name, created_at FROM sessions WHERE id = ?')
-    .bind(id)
-    .first<{ name: string; created_at: string }>();
-  if (result) {
-    sessionName = result.name;
-    sessionCreatedAt = result.created_at;
+if (!isDemo) {
+  try {
+    const db = getDB(Astro.locals);
+    const result = await db
+      .prepare('SELECT name, created_at FROM sessions WHERE id = ?')
+      .bind(id)
+      .first<{ name: string; created_at: string }>();
+    if (result) {
+      sessionName = result.name;
+      sessionCreatedAt = result.created_at;
+    }
+  } catch {
+    // Fall back to defaults if DB is unavailable
   }
-} catch {
-  // Fall back to defaults if DB is unavailable
 }
 
 // Build canonical URL for this session
@@ -44,5 +49,5 @@ const session = { id, name: sessionName, created_at: sessionCreatedAt };
   ogType="article"
   canonicalUrl={canonicalUrl}
 >
-  <Board session={session} client:only="preact" />
+  <Board session={session} isDemo={isDemo} client:only="preact" />
 </Layout>

@@ -3,6 +3,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import type { Session } from '../lib/store';
 import { getSessionHistory, removeFromSessionHistory } from '../lib/store';
 import { useCreateSession, createQueryClient } from '../lib/queries';
+import { DEMO_SESSION_ID } from '../lib/constants';
 
 // Native date formatter
 const formatDate = (dateStr: string) => {
@@ -75,6 +76,15 @@ function HomeContent() {
             </div>
           </div>
         </form>
+
+        <div class="text-center mb-8">
+          <a
+            href={`/${DEMO_SESSION_ID}`}
+            class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm hand-drawn underline"
+          >
+            or try the demo →
+          </a>
+        </div>
 
         <div>
           <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest hand-drawn">

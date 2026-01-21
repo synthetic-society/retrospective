@@ -12,11 +12,11 @@ const COLUMNS: { type: ColumnType; title: string; placeholder: string }[] = [
   { type: 'action', title: 'Actions', placeholder: 'We should…' },
 ];
 
-export default function Board({ session }: { session: Session }) {
+export default function Board({ session, isDemo = false }: { session: Session; isDemo?: boolean }) {
   const qc = useRef(createQueryClient());
   return (
     <QueryClientProvider client={qc.current}>
-      <BoardContent session={session} />
+      <BoardContent session={session} isDemo={isDemo} />
     </QueryClientProvider>
   );
 }
@@ -28,13 +28,13 @@ const addingTo = signal<ColumnType | null>(null);
 const animating = signal(new Map<string, 'up' | 'down'>());
 const fullscreenColumn = signal<ColumnType | null>(null);
 
-function BoardContent({ session: initialSession }: { session: Session }) {
+function BoardContent({ session: initialSession, isDemo = false }: { session: Session; isDemo?: boolean }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const { data: session = initialSession } = useSession(initialSession.id, initialSession);
+  const { data: session = initialSession } = useSession(initialSession.id, initialSession, isDemo);
 
-  const { data: cards = [], isLoading } = useCards(session.id);
-  const { data: votedIds = new Set<string>() } = useVotes(session.id);
+  const { data: cards = [], isLoading } = useCards(session.id, isDemo);
+  const { data: votedIds = new Set<string>() } = useVotes(session.id, isDemo);
 
   const prevPositions = useRef(new Map<string, { column: ColumnType; index: number }>());
 
@@ -150,6 +150,7 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                   sessionId={session.id}
                   hasVoted={votedIds.has(card.id)}
                   animation={animating.value.get(card.id)}
+                  isDemo={isDemo}
                 />
               ))}
             </div>
@@ -259,6 +260,7 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                       type={col.type}
                       placeholder={col.placeholder}
                       addingTo={addingTo}
+                      isDemo={isDemo}
                     />
                   )}
                   {columnCards.map(card => (
@@ -268,6 +270,7 @@ function BoardContent({ session: initialSession }: { session: Session }) {
                       sessionId={session.id}
                       hasVoted={votedIds.has(card.id)}
                       animation={animating.value.get(card.id)}
+                      isDemo={isDemo}
                     />
                   ))}
                 </div>

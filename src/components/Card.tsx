@@ -37,8 +37,8 @@ const handlePaste = (e: ClipboardEvent) => {
   document.execCommand('insertText', false, sanitizeInput(e.clipboardData?.getData('text/plain') || ''));
 };
 
-function useAutoSave(sessionId: string) {
-  const updateCard = useUpdateCard(sessionId);
+function useAutoSave(sessionId: string, isDemo = false) {
+  const updateCard = useUpdateCard(sessionId, isDemo);
   const timeout = useRef<number>();
   return (cardId: string, value: string) => {
     clearTimeout(timeout.current);
@@ -51,15 +51,17 @@ export function AddCard({
   type,
   placeholder,
   addingTo,
+  isDemo = false,
 }: {
   sessionId: string;
   type: ColumnType;
   placeholder: string;
   addingTo: Signal<ColumnType | null>;
+  isDemo?: boolean;
 }) {
   const [content, setContent] = useState('');
   const inputRef = useRef<HTMLSpanElement>(null);
-  const addCard = useAddCard(sessionId);
+  const addCard = useAddCard(sessionId, isDemo);
   const isActive = addingTo.value === type;
 
   useEffect(() => {
@@ -132,19 +134,21 @@ export function CardItem({
   sessionId,
   hasVoted,
   animation,
+  isDemo = false,
 }: {
   card: Card;
   sessionId: string;
   hasVoted: boolean;
   animation?: 'up' | 'down';
+  isDemo?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [content, setContent] = useState(card.content);
   const [justVoted, setJustVoted] = useState(false);
   const editRef = useRef<HTMLSpanElement>(null);
-  const deleteCard = useDeleteCard(sessionId);
-  const toggleVote = useToggleVote(sessionId);
-  const save = useAutoSave(sessionId);
+  const deleteCard = useDeleteCard(sessionId, isDemo);
+  const toggleVote = useToggleVote(sessionId, isDemo);
+  const save = useAutoSave(sessionId, isDemo);
 
   useEffect(() => setContent(card.content), [card.content]);
 
