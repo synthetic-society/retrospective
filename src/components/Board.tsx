@@ -116,12 +116,12 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
             class="sticky top-0 z-10 bg-beige-light border-b-2 border-sketch-dark p-4 flex items-center justify-between hand-drawn"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold hand-drawn">
+            <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
               {fullscreenCol.title} ({fullscreenCards.length})
             </h2>
             <button
               onClick={() => (fullscreenColumn.value = null)}
-              class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+              class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
               title="Close fullscreen"
               aria-label="Close fullscreen"
             >
@@ -167,11 +167,11 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
         <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">
           ← Back
         </a>
-        <h1 class="text-sketch-dark font-medium truncate mx-4 hand-drawn">{session.name}</h1>
+        <h1 class="text-sketch-dark font-medium truncate mx-4">{session.name}</h1>
         <div class="flex gap-2">
           <button
             onClick={toggleMusic}
-            class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
             title={isPlaying.value ? 'Pause background music' : 'Play background music'}
             aria-label={isPlaying.value ? 'Pause background music' : 'Play background music'}
             aria-pressed={isPlaying.value}
@@ -188,7 +188,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           </button>
           <button
             onClick={handleShare}
-            class="btn-primary btn-sm hand-drawn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
             aria-label={copied.value ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
             aria-live="polite"
           >
@@ -209,14 +209,14 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
               >
                 <div class="flex items-center gap-2">
                   <span class="text-sketch-dark">{isExpanded ? '▼' : '►'}</span>
-                  <span class="text-sketch-dark uppercase tracking-widest text-sm font-semibold hand-drawn">
+                  <span class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">
                     {col.title} ({columnCards.length})
                   </span>
                 </div>
               </button>
               <div class={`${isExpanded ? 'block' : 'hidden'} md:flex md:flex-col column bg-white/60`}>
-                <div class="hidden md:flex p-3 border-b-2 border-sketch-dark items-center justify-between hand-drawn">
-                  <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold hand-drawn">
+                <div class="hidden md:flex p-3 border-b-2 border-sketch-dark items-center justify-between">
+                  <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">
                     {col.title}
                   </h2>
                   <button
@@ -247,7 +247,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                   {col.type === 'action' && columnCards.length === 0 && addingTo.value !== 'action' ? (
                     <div
                       onClick={() => (addingTo.value = 'action')}
-                      class="border-2 border-dashed border-sketch-light/50 rounded p-4 text-sketch-light text-sm hand-drawn cursor-pointer hover:border-sketch-medium hover:text-sketch-medium hover:bg-white/20 transition-all duration-200"
+                      class="border-2 border-dashed border-sketch-light/50 rounded p-4 text-sketch-light text-sm cursor-pointer hover:border-sketch-medium hover:text-sketch-medium hover:bg-white/20 transition-all duration-200"
                     >
                       <div class="text-center">
                         <span class="italic">Waiting for everyone to have filled the other columns first…</span>

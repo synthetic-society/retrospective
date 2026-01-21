@@ -100,7 +100,7 @@ export function AddCard({
   }
 
   return (
-    <div class="bg-white border-2 border-sketch-dark rounded p-2 hand-drawn">
+    <div class="bg-white border-2 border-sketch-dark rounded p-2" style={{ willChange: 'contents' }}>
       <span
         ref={inputRef}
         role="textbox"
@@ -181,7 +181,8 @@ export function CardItem({
 
   return (
     <div
-      class={`min-h-16 group bg-white border-2 border-sketch-dark rounded p-3 hover:border-sketch-dark transition-colors relative hand-drawn cursor-text ${animClass}`}
+      class={`min-h-16 group bg-white border-2 border-sketch-dark rounded p-3 hover:border-sketch-dark transition-colors relative cursor-text ${animClass} ${editing ? '' : 'hand-drawn'}`}
+      style={{ willChange: editing ? 'contents' : 'auto' }}
       onClick={() => !editing && setEditing(true)}
     >
       <div

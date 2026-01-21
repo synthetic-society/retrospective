@@ -126,14 +126,17 @@
 
 .card-move-up {
   animation: cardMoveUp 0.4s ease-out;
+  will-change: transform, opacity;
 }
 
 .card-move-down {
   animation: cardMoveDown 0.3s ease-out;
+  will-change: transform, opacity;
 }
 
 .card-voted {
   animation: cardVoted 0.3s ease-out;
+  will-change: transform, box-shadow;
 }
 
 /* Sketch-style borders */
@@ -141,7 +144,7 @@
   border: 2px solid var(--color-sketch-dark);
   border-radius: 8px;
   position: relative;
-  filter: url(#handDrawnNoise);
+  /* Use hand-drawn class instead of inline filter for consistency */
 }
 
 .sketch-border::before {
@@ -168,6 +171,8 @@
   padding: 1rem;
   position: relative;
   filter: url(#handDrawnNoise);
+  will-change: transform;
+  contain: layout style;
 }
 
 .column::before {
@@ -190,17 +195,14 @@
 /* Reusable button styles */
 .btn {
   @apply border-2 rounded transition-all cursor-pointer;
-  filter: url(#handDrawnNoise);
 }
 
 .btn-primary {
   @apply border-2 rounded transition-all cursor-pointer border-sketch-dark text-sketch-dark hover:bg-sketch-dark hover:text-beige-light;
-  filter: url(#handDrawnNoise);
 }
 
 .btn-secondary {
   @apply border-2 rounded transition-all cursor-pointer border-sketch-medium text-sketch-medium hover:border-sketch-dark hover:text-sketch-dark;
-  filter: url(#handDrawnNoise);
 }
 
 .btn-ghost {
@@ -224,5 +226,6 @@
 /* Reusable input styles */
 .input {
   @apply bg-white border-2 border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus:outline-none transition-all;
-  filter: url(#handDrawnNoise);
+  /* filter removed for input performance - SVG turbulence causes input lag */
+  will-change: border-color;
 }
