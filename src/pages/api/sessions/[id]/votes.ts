@@ -7,14 +7,14 @@ import {
   isSessionExpired,
 } from '../../../../lib/api-utils';
 import { getDB } from '../../../../lib/db';
-import { VoteSchema } from '../../../../lib/schemas';
+import { VoterIdSchema } from '../../../../lib/schemas';
 import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/constants';
 
 export async function GET({ params, url, locals }: APIContext) {
   const { id: session_id } = params;
   if (!validateUUID(session_id)) return errorResponse('Invalid session ID', 400);
 
-  const parsed = VoteSchema.safeParse({ voter_id: url.searchParams.get('voter_id') });
+  const parsed = VoterIdSchema.safeParse({ voter_id: url.searchParams.get('voter_id') });
   if (!parsed.success) return zodErrorResponse(parsed.error);
 
   const db = getDB(locals);

@@ -26,4 +26,5 @@ export const UpdateCardSchema = z.object({
   column_type: ColumnTypeSchema.optional(),
 });
 export const DeleteCardSchema = z.object({ session_id: UUIDSchema });
-export const VoteSchema = z.object({ voter_id: UUIDSchema });
+export const VoterIdSchema = z.object({ voter_id: UUIDSchema });
+export const VoteSchema = z.object({ session_id: UUIDSchema, voter_id: UUIDSchema });

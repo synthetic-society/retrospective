@@ -136,7 +136,7 @@ export const useToggleVote = (sessionId: string, isDemo = false) => {
   return useMutation({
     mutationFn: async (cardId: string) => {
       if (isDemo) return; // No API call in demo mode
-      return api.patch(`cards/${cardId}/vote`, { json: { voter_id: clientId } });
+      return api.patch(`cards/${cardId}/vote`, { json: { session_id: sessionId, voter_id: clientId } });
     },
     onMutate: async cardId => {
       await Promise.all([qc.cancelQueries({ queryKey: cardsKey }), qc.cancelQueries({ queryKey: votesKey })]);
