@@ -55,3 +55,28 @@ npx wrangler deploy
 ```
 
 The app will be deployed to your Cloudflare Workers subdomain at `https://retrospective.<your-subdomain>.workers.dev`
+
+## Testing
+
+The project uses [Playwright](https://playwright.dev/) for end-to-end testing with accessibility tests by [axe-core](https://github.com/dequelabs/axe-core).
+
+### Running Tests
+
+```bash
+# Run all tests (starts dev server automatically)
+pnpm test
+
+# Run tests with interactive UI only
+pnpm test:ui
+
+# Run accessibility tests only
+pnpm test:a11y
+```
+
+### Test Reports
+
+After running tests, an HTML report is generated in `playwright-report/`. Open it with:
+
+```bash
+npx playwright show-report
+```
