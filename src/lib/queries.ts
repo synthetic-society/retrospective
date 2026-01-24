@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
 import ky from 'ky';
 import type { Session, Card, ColumnType } from './store';
-import { getClientId, addToSessionHistory } from './store';
+import { getClientId, addToSessionHistory, removeFromSessionHistory, getAdminToken } from './store';
 import { DEMO_SESSION_ID } from './constants';
 
 const api = ky.extend({ prefixUrl: '/api', timeout: 10000 });
@@ -231,5 +231,15 @@ export const useCreateSession = () =>
       const session = await api.post('sessions', { json: { name } }).json<Session>();
       addToSessionHistory(session);
       return session;
+    },
+  });
+
+export const useDeleteSession = () =>
+  useMutation({
+    mutationFn: async (sessionId: string) => {
+      const adminToken = getAdminToken(sessionId);
+      if (!adminToken) throw new Error('No admin token for this session');
+      await api.delete(`sessions/${sessionId}?admin_token=${adminToken}`);
+      removeFromSessionHistory(sessionId);
     },
   });

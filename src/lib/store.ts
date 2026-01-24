@@ -2,6 +2,8 @@ export interface Session {
   id: string;
   name: string;
   created_at: string;
+  expires_at?: string;
+  admin_token?: string;
 }
 
 export interface Card {
@@ -39,4 +41,12 @@ export const addToSessionHistory = (session: Session): void => {
 export const removeFromSessionHistory = (id: string): void => {
   if (!isBrowser) return;
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(getSessionHistory().filter(s => s.id !== id)));
+};
+
+export const getAdminToken = (sessionId: string): string | undefined => {
+  return getSessionHistory().find(s => s.id === sessionId)?.admin_token;
+};
+
+export const hasAdminToken = (sessionId: string): boolean => {
+  return !!getAdminToken(sessionId);
 };

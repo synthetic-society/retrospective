@@ -209,6 +209,10 @@
   @apply border-transparent text-sketch-medium hover:text-sketch-dark cursor-pointer;
 }
 
+.btn-danger {
+  @apply border-2 rounded transition-all cursor-pointer border-red-400 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500;
+}
+
 .btn-sm {
   @apply text-xs px-2 py-1;
 }

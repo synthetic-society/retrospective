@@ -13,13 +13,14 @@ export async function POST({ request, locals }: APIContext) {
   if (!parsed.success) return zodErrorResponse(parsed.error);
 
   const id = crypto.randomUUID();
+  const admin_token = crypto.randomUUID();
   const created_at = new Date().toISOString();
   const expires_at = new Date(Date.now() + SESSION_EXPIRY_DAYS * 86400000).toISOString();
 
   await getDB(locals)
-    .prepare('INSERT INTO sessions (id, name, created_at, expires_at) VALUES (?, ?, ?, ?)')
-    .bind(id, parsed.data.name, created_at, expires_at)
+    .prepare('INSERT INTO sessions (id, name, created_at, expires_at, admin_token) VALUES (?, ?, ?, ?, ?)')
+    .bind(id, parsed.data.name, created_at, expires_at, admin_token)
     .run();
 
-  return jsonResponse({ id, name: parsed.data.name, created_at, expires_at }, 201);
+  return jsonResponse({ id, name: parsed.data.name, created_at, expires_at, admin_token }, 201);
 }

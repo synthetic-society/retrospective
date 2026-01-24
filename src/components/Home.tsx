@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
 import { QueryClientProvider } from '@tanstack/react-query';
 import type { Session } from '../lib/store';
-import { getSessionHistory, removeFromSessionHistory } from '../lib/store';
-import { useCreateSession, createQueryClient } from '../lib/queries';
+import { getSessionHistory, hasAdminToken } from '../lib/store';
+import { useCreateSession, useDeleteSession, createQueryClient } from '../lib/queries';
 import { DEMO_SESSION_ID } from '../lib/constants';
 
 // Native date formatter
@@ -22,7 +22,9 @@ export default function Home() {
 function HomeContent() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [name, setName] = useState('');
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const create = useCreateSession();
+  const deleteSession = useDeleteSession();
 
   useEffect(() => {
     setSessions(getSessionHistory());
@@ -35,11 +37,27 @@ function HomeContent() {
     window.location.href = `/${session.id}`;
   };
 
-  const handleRemove = (id: string, e: Event) => {
+  const handleDeleteClick = (id: string, e: Event) => {
     e.preventDefault();
     e.stopPropagation();
-    removeFromSessionHistory(id);
+    setDeleteConfirm(id);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteConfirm) return;
+    await deleteSession.mutateAsync(deleteConfirm);
     setSessions(getSessionHistory());
+    setDeleteConfirm(null);
+  };
+
+  const formatExpiry = (expiresAt?: string) => {
+    if (!expiresAt) return null;
+    const expiry = new Date(expiresAt);
+    const now = new Date();
+    const daysLeft = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysLeft <= 0) return 'Expired';
+    if (daysLeft === 1) return 'Expires tomorrow';
+    return `Expires in ${daysLeft} days`;
   };
 
   return (
@@ -86,7 +104,7 @@ function HomeContent() {
 
         <div>
           <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest hand-drawn">
-            ─── Previous Sessions ───
+            ─── Sessions you created ───
           </div>
           {sessions.length === 0 ? (
             <div class="text-center text-sketch-medium italic py-8 border-2 border-dashed border-sketch-medium rounded hand-drawn">
@@ -105,20 +123,51 @@ function HomeContent() {
                       <span>▸</span>
                       <span class="font-medium">{s.name}</span>
                     </div>
-                    <button
-                      onClick={e => handleRemove(s.id, e)}
-                      class="text-sketch-medium hover:text-sketch-dark transition-colors px-2 cursor-pointer"
-                      title="Remove"
-                    >
-                      ×
-                    </button>
+                    {hasAdminToken(s.id) && (
+                      <button
+                        onClick={e => handleDeleteClick(s.id, e)}
+                        class="btn-danger btn-sm uppercase tracking-wider"
+                        title="Delete session"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
-                  <div class="text-sketch-medium text-xs mt-1 ml-5">{formatDate(s.created_at)}</div>
+                  <div class="flex justify-between items-center text-sketch-medium text-xs mt-1 ml-5">
+                    <span>{formatDate(s.created_at)}</span>
+                    {s.expires_at && <span class="text-sketch-medium/70">{formatExpiry(s.expires_at)}</span>}
+                  </div>
                 </a>
               ))}
             </div>
           )}
         </div>
+
+        {deleteConfirm && (
+          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-white border-2 border-sketch-dark rounded p-6 max-w-sm mx-4 hand-drawn">
+              <h3 class="text-lg font-semibold text-sketch-dark mb-4">Delete Session?</h3>
+              <p class="text-sketch-medium mb-6">
+                This will permanently delete the session and all its cards. This action cannot be undone.
+              </p>
+              <div class="flex gap-3 justify-end">
+                <button
+                  onClick={() => setDeleteConfirm(null)}
+                  class="px-4 py-2 border-2 border-sketch-dark rounded hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={deleteSession.isPending}
+                  class="px-4 py-2 bg-red-500 text-white border-2 border-red-600 rounded hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  {deleteSession.isPending ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
