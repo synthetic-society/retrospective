@@ -39,6 +39,9 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Apply D1 migrations (local)
+        run: pnpm exec wrangler d1 execute DB --local --file=migrations/0001_init.sql
+
       - name: Run tests
         run: pnpm test
 
