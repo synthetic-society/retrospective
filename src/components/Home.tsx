@@ -166,6 +166,12 @@ function HomeContent() {
             </div>
           </div>
         )}
+
+        <footer class="mt-8 text-center">
+          <a href="/privacy" class="text-sketch-medium text-xs hover:text-sketch-dark underline">
+            Privacy Policy
+          </a>
+        </footer>
       </div>
     </div>
   );

@@ -1,0 +1,114 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Privacy Policy | Retrospective" description="Privacy policy for the Retrospective Board">
+  <main class="max-w-3xl mx-auto px-4 py-8 md:py-12">
+    <article class="prose prose-slate max-w-none">
+      <h1 class="text-2xl md:text-3xl font-semibold text-sketch-dark mb-6">Privacy Policy</h1>
+      
+      <p class="text-sketch-medium text-sm mb-8">Last updated: 24 January 2026</p>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">1. Who We Are</h2>
+        <p class="text-sketch-dark mb-2">
+          This web application is built by Luc Rocher (https://rocher.lc).
+          You can contact me by email at <i>x (at) y where x=help and y=rocher.lc</i>.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">2. What Data We Collect &amp; Why</h2>
+
+        <p class="mb-4">We store on the server very few data, and only: the name of the session (to identify your retrospective board), card content (to display user-contributed feedback), vote records (to count votes and prevent double-voting), and a session-scoped voter ID (to prevent duplicate votes within a session).</p>
+        <p class="mb-4">
+          We store in your browser your session history (to help you quickly access recent sessions) and per-session voter IDs (to remember your votes within each session).
+        </p>
+
+        <p class="mb-4">We do not collect any personal information such as email addresses or names, nor do we require account creation. We do not use analytics or advertising trackers, and do not collect location data.</p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">3. How Data Is Shared</h2>
+        
+        <h3 class="text-lg font-medium text-sketch-dark mt-4 mb-2">With other session participants</h3>
+        <p class="text-sketch-medium mb-4">
+          Card content and vote counts are visible to anyone who has the session link, and only to them. Sessions are accessible via a unique private session link.
+        </p>
+
+        <h3 class="text-lg font-medium text-sketch-dark mt-4 mb-2">With infrastructure providers</h3>
+        <p class="text-sketch-medium mb-2">
+          <strong>Cloudflare:</strong> This application is hosted on Cloudflare with data stored in a Cloudflare database. 
+          Cloudflare processes request metadata (including IP addresses) to deliver and secure the service, 
+          even though we do not store IP addresses in our application database.
+        </p>
+        <p class="text-sketch-medium mb-4">
+          Cloudflare acts as a data processor. For details, see 
+          <a href="https://www.cloudflare.com/privacypolicy/" class="text-sketch-dark underline" target="_blank" rel="noopener noreferrer">Cloudflare's Privacy Policy</a>.
+        </p>
+
+        <h3 class="text-lg font-medium text-sketch-dark mt-4 mb-2">Sale or sharing for advertising</h3>
+        <p class="text-sketch-medium">
+          We do not sell or share personal data.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">4. International Transfers</h2>
+        <p class="text-sketch-medium">
+          Cloudflare operates a global network, and your data may be processed in data centers outside your country of residence, 
+          including in the United States. See 
+          <a href="https://www.cloudflare.com/trust-hub/gdpr/" class="text-sketch-dark underline" target="_blank" rel="noopener noreferrer">Cloudflare's GDPR page</a> for details.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">5. Data Retention</h2>
+        <ul class="list-disc list-inside text-sketch-medium space-y-2">
+          <li><strong>Sessions and cards:</strong> Automatically deleted 30 days after the last activity (card creation or update).</li>
+          <li><strong>Browser storage:</strong> Persists until you clear your browser data.</li>
+          <li><strong>Cloudflare logs:</strong> We have disabled application-level logging. 
+              Cloudflare may retain minimal operational logs per their data retention policies.</li>
+        </ul>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">6. How to Exercise Your Rights</h2>
+        <p class="text-sketch-medium mb-4">
+          We do not collect personal data, although personal data may be included in the name of a private session or the content of a card. Contact us to exercise your rights by email at <i>x (at) y where x=help and y=rocher.lc</i>.
+        </p>
+        <p class="text-sketch-medium mb-2">
+          <strong>What to include:</strong> A description of your request and enough information for us to identify the relevant session(s).
+        </p>
+        <p class="text-sketch-medium mb-2">
+          <strong>Verification:</strong> Since sessions are anonymous, we may ask you to provide the session URL to verify your relationship to the data.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">7. Cookies &amp; Local Storage</h2>
+        <p class="text-sketch-medium mb-4">
+          <strong>Cookies:</strong> Our application does not set cookies. However, Cloudflare may set security-related cookies 
+          (such as <code class="bg-beige px-1 rounded">__cf_bm</code> for bot management) if their security features are triggered. 
+          These are strictly necessary cookies that do not require consent.
+        </p>
+        <p class="text-sketch-medium">
+          <strong>Browser storage:</strong> We store session history and per-session voter IDs locally on your device. 
+          This data never leaves your browser except for voter IDs which are sent to verify votes.
+        </p>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-xl font-semibold text-sketch-dark mb-3">8. Changes to This Policy</h2>
+        <p class="text-sketch-medium">
+          We may update this privacy policy from time to time. Changes will be posted on this page with an updated revision date. 
+          Continued use of the service after changes constitutes acceptance of the updated policy.
+        </p>
+      </section>
+
+      <div class="mt-12 pt-6 border-t border-beige-dark">
+        <a href="/" class="text-sketch-medium hover:text-sketch-dark underline">← Back to home</a>
+      </div>
+    </article>
+  </main>
+</Layout>

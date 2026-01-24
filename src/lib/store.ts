@@ -21,10 +21,15 @@ const isBrowser = typeof window !== 'undefined';
 const storage = <T>(key: string, fallback: T) =>
   isBrowser ? JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)) : fallback;
 
-export const getClientId = (): string => {
+/**
+ * Get a session-scoped voter ID. Each session gets its own random ID,
+ * reducing cross-session tracking while still preventing double-voting.
+ */
+export const getVoterId = (sessionId: string): string => {
   if (!isBrowser) return '';
-  let id = localStorage.getItem('retro_client_id');
-  if (!id) localStorage.setItem('retro_client_id', (id = crypto.randomUUID()));
+  const key = `retro_voter_${sessionId}`;
+  let id = localStorage.getItem(key);
+  if (!id) localStorage.setItem(key, (id = crypto.randomUUID()));
   return id;
 };
 

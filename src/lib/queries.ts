@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
 import ky from 'ky';
 import type { Session, Card, ColumnType } from './store';
-import { getClientId, addToSessionHistory, removeFromSessionHistory, getAdminToken } from './store';
+import { getVoterId, addToSessionHistory, removeFromSessionHistory, getAdminToken } from './store';
 import { DEMO_SESSION_ID } from './constants';
 
 const api = ky.extend({ prefixUrl: '/api', timeout: 10000 });
@@ -121,11 +121,11 @@ export const useCards = (sessionId: string, isDemo = false) =>
   });
 
 export const useVotes = (sessionId: string, isDemo = false) => {
-  const clientId = getClientId();
+  const voterId = getVoterId(sessionId);
   return useQuery({
-    queryKey: queryKeys.votes(sessionId, clientId),
+    queryKey: queryKeys.votes(sessionId, voterId),
     queryFn: () =>
-      isDemo ? Promise.resolve([]) : api.get(`sessions/${sessionId}/votes?voter_id=${clientId}`).json<string[]>(),
+      isDemo ? Promise.resolve([]) : api.get(`sessions/${sessionId}/votes?voter_id=${voterId}`).json<string[]>(),
     initialData: isDemo ? [] : undefined,
     refetchInterval: isDemo ? false : 10000, // Poll every 10s (disabled for demo)
     refetchIntervalInBackground: false, // Pause polling when tab is hidden
@@ -193,14 +193,14 @@ export const useDeleteCard = (sessionId: string, isDemo = false) => {
 
 export const useToggleVote = (sessionId: string, isDemo = false) => {
   const qc = useQueryClient();
-  const clientId = getClientId();
+  const voterId = getVoterId(sessionId);
   const cardsKey = queryKeys.cards(sessionId);
-  const votesKey = queryKeys.votes(sessionId, clientId);
+  const votesKey = queryKeys.votes(sessionId, voterId);
 
   return useMutation({
     mutationFn: async (cardId: string) => {
       if (isDemo) return; // No API call in demo mode
-      return api.patch(`cards/${cardId}/vote`, { json: { session_id: sessionId, voter_id: clientId } });
+      return api.patch(`cards/${cardId}/vote`, { json: { session_id: sessionId, voter_id: voterId } });
     },
     onMutate: async cardId => {
       await Promise.all([qc.cancelQueries({ queryKey: cardsKey }), qc.cancelQueries({ queryKey: votesKey })]);
