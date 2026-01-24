@@ -1,5 +1,7 @@
 # Retro://spective
 
+[![Test](https://github.com/synthetic-society/retrospective/actions/workflows/test.yml/badge.svg)](https://github.com/synthetic-society/retrospective/actions/workflows/test.yml)
+
 A minimal retrospective board with four columns: **Glad** (what went well), **Wonder** (questions), **Sad** (improvements), and **Action** (follow-ups). Fully anonymous and collaborative: anyone can add, edit, vote, or delete cards. Built with Astro, Preact, Tailwind CSS, and Cloudflare D1.
 
 ## Quick Start

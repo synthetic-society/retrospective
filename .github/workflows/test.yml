@@ -40,7 +40,10 @@ jobs:
         run: pnpm build
 
       - name: Apply D1 migrations (local)
-        run: pnpm exec wrangler d1 execute DB --local --file=migrations/0001_init.sql
+        run: |
+          for f in migrations/*.sql; do
+            pnpm exec wrangler d1 execute DB --local --file="$f"
+          done
 
       - name: Run tests
         run: pnpm test
