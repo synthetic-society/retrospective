@@ -21,7 +21,9 @@ export const CreateCardSchema = z.object({
   content: trimmedString(MAX_CARD_CONTENT_LENGTH),
 });
 export const UpdateCardSchema = z.object({
+  session_id: UUIDSchema,
   content: trimmedString(MAX_CARD_CONTENT_LENGTH).optional(),
   column_type: ColumnTypeSchema.optional(),
 });
+export const DeleteCardSchema = z.object({ session_id: UUIDSchema });
 export const VoteSchema = z.object({ voter_id: UUIDSchema });

@@ -102,7 +102,7 @@ export const useUpdateCard = (sessionId: string, isDemo = false) => {
         const card = cards.find(c => c.id === id);
         return { ...card!, content };
       }
-      return api.patch(`cards/${id}`, { json: { content } }).json<Card>();
+      return api.patch(`cards/${id}`, { json: { session_id: sessionId, content } }).json<Card>();
     },
     onSuccess: card =>
       qc.setQueryData<Card[]>(queryKeys.cards(sessionId), old => old?.map(c => (c.id === card.id ? card : c)) ?? []),
@@ -115,7 +115,7 @@ export const useDeleteCard = (sessionId: string, isDemo = false) => {
   return useMutation({
     mutationFn: async (id: string) => {
       if (isDemo) return; // No API call in demo mode
-      return api.delete(`cards/${id}`);
+      return api.delete(`cards/${id}?session_id=${sessionId}`);
     },
     onMutate: async id => {
       await qc.cancelQueries({ queryKey: key });
