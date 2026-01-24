@@ -54,9 +54,7 @@ function HomeContent() {
 
         <form onSubmit={handleCreate} class="mb-10">
           <div class="border-2 border-sketch-dark bg-white/60 p-4 rounded hand-drawn">
-            <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider">
-              Session Name:
-            </label>
+            <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider">Session Name:</label>
             <div class="flex gap-2">
               <input
                 type="text"

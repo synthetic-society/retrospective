@@ -108,13 +108,10 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
     <div class="min-h-screen flex flex-col">
       {/* Fullscreen overlay */}
       {fullscreenCol && (
-        <div
-          class="fixed inset-0 z-50 bg-beige-light/95 overflow-auto"
-          onClick={() => (fullscreenColumn.value = null)}
-        >
+        <div class="fixed inset-0 z-50 bg-beige-light/95 overflow-auto" onClick={() => (fullscreenColumn.value = null)}>
           <div
             class="sticky top-0 z-10 bg-beige-light border-b-2 border-sketch-dark p-4 flex items-center justify-between hand-drawn"
-            onClick={(e) => e.stopPropagation()}
+            onClick={e => e.stopPropagation()}
           >
             <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
               {fullscreenCol.title} ({fullscreenCards.length})
@@ -141,7 +138,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
               </svg>
             </button>
           </div>
-          <div class="p-6" onClick={(e) => e.stopPropagation()}>
+          <div class="p-6" onClick={e => e.stopPropagation()}>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {fullscreenCards.map(card => (
                 <CardItem
@@ -155,9 +152,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
               ))}
             </div>
             {fullscreenCards.length === 0 && (
-              <div class="text-center text-sketch-medium italic hand-drawn py-12">
-                No cards in this column yet
-              </div>
+              <div class="text-center text-sketch-medium italic hand-drawn py-12">No cards in this column yet</div>
             )}
           </div>
         </div>
@@ -216,11 +211,9 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
               </button>
               <div class={`${isExpanded ? 'block' : 'hidden'} md:flex md:flex-col column bg-white/60`}>
                 <div class="hidden md:flex p-3 border-b-2 border-sketch-dark items-center justify-between">
-                  <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">
-                    {col.title}
-                  </h2>
+                  <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">{col.title}</h2>
                   <button
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       fullscreenColumn.value = col.type;
                     }}

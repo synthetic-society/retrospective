@@ -14,7 +14,10 @@ export async function PATCH({ params, request, locals }: APIContext) {
   if (!parsed.success) return zodErrorResponse(parsed.error);
 
   const db = getDB(locals);
-  const existing = await db.prepare('SELECT id, session_id FROM cards WHERE id = ?').bind(id).first<{ id: string; session_id: string }>();
+  const existing = await db
+    .prepare('SELECT id, session_id FROM cards WHERE id = ?')
+    .bind(id)
+    .first<{ id: string; session_id: string }>();
   if (!existing) return errorResponse('Card not found', 404);
 
   // Verify the requester knows the correct session_id (session-scoped authorization)
@@ -44,7 +47,10 @@ export async function DELETE({ params, locals, url }: APIContext) {
   if (!parsed.success) return zodErrorResponse(parsed.error);
 
   const db = getDB(locals);
-  const existing = await db.prepare('SELECT id, session_id FROM cards WHERE id = ?').bind(id).first<{ id: string; session_id: string }>();
+  const existing = await db
+    .prepare('SELECT id, session_id FROM cards WHERE id = ?')
+    .bind(id)
+    .first<{ id: string; session_id: string }>();
   if (!existing) return errorResponse('Card not found', 404);
 
   // Verify the requester knows the correct session_id (session-scoped authorization)

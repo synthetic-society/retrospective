@@ -17,7 +17,10 @@ export async function PATCH({ params, request, locals }: APIContext) {
   const db = getDB(locals);
 
   // Verify card belongs to the claimed session (session-scoped authorization)
-  const card = await db.prepare('SELECT id FROM cards WHERE id = ? AND session_id = ?').bind(card_id, session_id).first();
+  const card = await db
+    .prepare('SELECT id FROM cards WHERE id = ? AND session_id = ?')
+    .bind(card_id, session_id)
+    .first();
   if (!card) return errorResponse('Card not found', 404);
 
   const existing = await db

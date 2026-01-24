@@ -15,8 +15,8 @@ async function addCard(page: Page, content: string) {
   await page.getByRole('textbox').first().fill(content);
 
   // Wait for the API response when adding
-  const responsePromise = page.waitForResponse(resp =>
-    resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST'
+  const responsePromise = page.waitForResponse(
+    resp => resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST'
   );
   await page.getByRole('button', { name: 'Add' }).click();
   await responsePromise;
@@ -29,8 +29,8 @@ async function addCard(page: Page, content: string) {
 
 // Helper to click vote and wait for API response
 async function clickVote(page: Page, voteButton: ReturnType<Page['getByRole']>) {
-  const responsePromise = page.waitForResponse(resp =>
-    resp.url().includes('/api/cards/') && resp.url().includes('/vote') && resp.request().method() === 'PATCH'
+  const responsePromise = page.waitForResponse(
+    resp => resp.url().includes('/api/cards/') && resp.url().includes('/vote') && resp.request().method() === 'PATCH'
   );
   await voteButton.click();
   await responsePromise;
@@ -42,11 +42,11 @@ async function reloadAndWait(page: Page) {
   await page.waitForTimeout(1100);
 
   // Wait for both cards and votes API calls after reload
-  const cardsPromise = page.waitForResponse(resp =>
-    resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'GET'
+  const cardsPromise = page.waitForResponse(
+    resp => resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'GET'
   );
-  const votesPromise = page.waitForResponse(resp =>
-    resp.url().includes('/api/sessions/') && resp.url().includes('/votes') && resp.request().method() === 'GET'
+  const votesPromise = page.waitForResponse(
+    resp => resp.url().includes('/api/sessions/') && resp.url().includes('/votes') && resp.request().method() === 'GET'
   );
   await page.reload();
   await Promise.all([cardsPromise, votesPromise]);

@@ -36,5 +36,9 @@ export async function GET({ params, url, locals }: APIContext) {
     .bind(session_id, parsed.data.voter_id)
     .all();
 
-  return jsonResponse((result.results || []).map((r: any) => r.card_id), 200, 1); // 1s cache with stale-while-revalidate
+  return jsonResponse(
+    (result.results || []).map((r: any) => r.card_id),
+    200,
+    1
+  ); // 1s cache with stale-while-revalidate
 }

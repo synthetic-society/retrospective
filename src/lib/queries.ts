@@ -8,15 +8,78 @@ const api = ky.extend({ prefixUrl: '/api', timeout: 10000 });
 
 // Demo cards to seed the demo board
 const DEMO_CARDS: Card[] = [
-  { id: 'demo-1', session_id: DEMO_SESSION_ID, column_type: 'glad', content: 'Paper accepted at CHI 2026! Great teamwork on the revisions.', votes: 5, created_at: new Date().toISOString() },
-  { id: 'demo-2', session_id: DEMO_SESSION_ID, column_type: 'glad', content: 'New PhD student onboarding went smoothly', votes: 2, created_at: new Date().toISOString() },
-  { id: 'demo-3', session_id: DEMO_SESSION_ID, column_type: 'glad', content: 'Weekly reading group discussions have been really insightful', votes: 3, created_at: new Date().toISOString() },
-  { id: 'demo-4', session_id: DEMO_SESSION_ID, column_type: 'wondering', content: 'Should we move lab meetings to a different time slot?', votes: 2, created_at: new Date().toISOString() },
-  { id: 'demo-5', session_id: DEMO_SESSION_ID, column_type: 'wondering', content: 'How can we better support undergrads doing research?', votes: 1, created_at: new Date().toISOString() },
-  { id: 'demo-6', session_id: DEMO_SESSION_ID, column_type: 'sad', content: 'Paper submission deadline crunch affected everyone\'s well-being', votes: 4, created_at: new Date().toISOString() },
-  { id: 'demo-7', session_id: DEMO_SESSION_ID, column_type: 'sad', content: 'Hard to book meeting rooms for user studies', votes: 2, created_at: new Date().toISOString() },
-  { id: 'demo-8', session_id: DEMO_SESSION_ID, column_type: 'action', content: 'Set up shared calendar for equipment bookings', votes: 3, created_at: new Date().toISOString() },
-  { id: 'demo-9', session_id: DEMO_SESSION_ID, column_type: 'action', content: 'Create a mentorship pairing for new lab members', votes: 4, created_at: new Date().toISOString() },
+  {
+    id: 'demo-1',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'glad',
+    content: 'Paper accepted at CHI 2026! Great teamwork on the revisions.',
+    votes: 5,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-2',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'glad',
+    content: 'New PhD student onboarding went smoothly',
+    votes: 2,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-3',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'glad',
+    content: 'Weekly reading group discussions have been really insightful',
+    votes: 3,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-4',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'wondering',
+    content: 'Should we move lab meetings to a different time slot?',
+    votes: 2,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-5',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'wondering',
+    content: 'How can we better support undergrads doing research?',
+    votes: 1,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-6',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'sad',
+    content: "Paper submission deadline crunch affected everyone's well-being",
+    votes: 4,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-7',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'sad',
+    content: 'Hard to book meeting rooms for user studies',
+    votes: 2,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-8',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'action',
+    content: 'Set up shared calendar for equipment bookings',
+    votes: 3,
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: 'demo-9',
+    session_id: DEMO_SESSION_ID,
+    column_type: 'action',
+    content: 'Create a mentorship pairing for new lab members',
+    votes: 4,
+    created_at: new Date().toISOString(),
+  },
 ];
 
 export const queryKeys = {
@@ -49,7 +112,7 @@ export const createQueryClient = () =>
 export const useCards = (sessionId: string, isDemo = false) =>
   useQuery({
     queryKey: queryKeys.cards(sessionId),
-    queryFn: () => isDemo ? Promise.resolve(DEMO_CARDS) : api.get(`sessions/${sessionId}/cards`).json<Card[]>(),
+    queryFn: () => (isDemo ? Promise.resolve(DEMO_CARDS) : api.get(`sessions/${sessionId}/cards`).json<Card[]>()),
     initialData: isDemo ? DEMO_CARDS : undefined,
     refetchInterval: isDemo ? false : 10000, // Poll every 10s (disabled for demo)
     refetchIntervalInBackground: false, // Pause polling when tab is hidden
@@ -61,7 +124,8 @@ export const useVotes = (sessionId: string, isDemo = false) => {
   const clientId = getClientId();
   return useQuery({
     queryKey: queryKeys.votes(sessionId, clientId),
-    queryFn: () => isDemo ? Promise.resolve([]) : api.get(`sessions/${sessionId}/votes?voter_id=${clientId}`).json<string[]>(),
+    queryFn: () =>
+      isDemo ? Promise.resolve([]) : api.get(`sessions/${sessionId}/votes?voter_id=${clientId}`).json<string[]>(),
     initialData: isDemo ? [] : undefined,
     refetchInterval: isDemo ? false : 10000, // Poll every 10s (disabled for demo)
     refetchIntervalInBackground: false, // Pause polling when tab is hidden
