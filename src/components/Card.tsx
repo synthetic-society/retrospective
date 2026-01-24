@@ -104,6 +104,7 @@ export function AddCard({
       <span
         ref={inputRef}
         role="textbox"
+        aria-label="Card content"
         contenteditable
         onInput={handleInput}
         onPaste={handlePaste}
@@ -211,6 +212,7 @@ export function CardItem({
               }
             }}
             role="textbox"
+            aria-label="Edit card content"
             contenteditable
             onInput={handleChange}
             onPaste={handlePaste}
