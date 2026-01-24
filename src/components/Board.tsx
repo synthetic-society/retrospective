@@ -96,7 +96,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
   if (isLoading) {
     return (
       <div class="min-h-screen flex items-center justify-center">
-        <div class="text-sketch-dark hand-drawn">~ Loading ~</div>
+        <div class="text-sketch-dark">~ Loading ~</div>
       </div>
     );
   }
@@ -110,7 +110,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
       {fullscreenCol && (
         <div class="fixed inset-0 z-50 bg-beige-light/95 overflow-auto" onClick={() => (fullscreenColumn.value = null)}>
           <div
-            class="sticky top-0 z-10 bg-beige-light border-b-2 border-sketch-dark p-4 flex items-center justify-between hand-drawn"
+            class="sticky top-0 z-10 bg-beige-light p-4 flex items-center justify-between doodly-border-b"
             onClick={e => e.stopPropagation()}
           >
             <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
@@ -152,13 +152,13 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
               ))}
             </div>
             {fullscreenCards.length === 0 && (
-              <div class="text-center text-sketch-medium italic hand-drawn py-12">No cards in this column yet</div>
+              <div class="text-center text-sketch-medium italic py-12">No cards in this column yet</div>
             )}
           </div>
         </div>
       )}
 
-      <header class="border-b-2 border-sketch-dark bg-white/40 p-3 flex items-center justify-between hand-drawn">
+      <header class="bg-white/40 p-3 flex items-center justify-between doodly-border-b">
         <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">
           ← Back
         </a>
@@ -166,7 +166,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
         <div class="flex gap-2">
           <button
             onClick={toggleMusic}
-            class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            class="btn-primary btn-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
             title={isPlaying.value ? 'Pause background music' : 'Play background music'}
             aria-label={isPlaying.value ? 'Pause background music' : 'Play background music'}
             aria-pressed={isPlaying.value}
@@ -183,7 +183,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           </button>
           <button
             onClick={handleShare}
-            class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            class="btn-primary btn-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
             aria-label={copied.value ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
             aria-live="polite"
           >
@@ -200,7 +200,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
             <div key={col.type}>
               <button
                 onClick={() => (expandedColumn.value = isExpanded ? null : col.type)}
-                class="md:hidden w-full p-3 flex items-center justify-between bg-white/60 border-l-4 border-b-2 border-sketch-dark hand-drawn cursor-pointer hover:bg-white transition-all mx-2 my-2"
+                class="md:hidden w-full p-3 flex items-center justify-between bg-white/60 doodly-border cursor-pointer hover:bg-white transition-all mx-2 my-2"
               >
                 <div class="flex items-center gap-2">
                   <span class="text-sketch-dark">{isExpanded ? '▼' : '►'}</span>

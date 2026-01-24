@@ -54,10 +54,28 @@ const finalOgDescription = ogDescription || description;
 
     <title>{title}</title>
   </head>
-  <body class="font-mono text-sketch-dark min-h-screen" style="background-color: #f5f0e8;">
+  <body class="font-mono text-sketch-dark min-h-screen bg-bg">
     <!-- Hand-drawn SVG filter -->
-    <svg height="0" width="0" style="position: absolute;">
+    <svg height="0" width="0" class="absolute">
+      <!-- Default filter (stronger for Chrome/Safari/WebKit) -->
       <filter id="handDrawnNoise" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.04"
+          numOctaves="2"
+          seed="0"
+          result="noise"
+        />
+        <feDisplacementMap
+          in="SourceGraphic"
+          in2="noise"
+          scale="2"
+          xChannelSelector="R"
+          yChannelSelector="G"
+        />
+      </filter>
+      <!-- Lighter filter for Firefox (renders displacement more strongly) -->
+      <filter id="handDrawnNoiseFirefox" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
         <feTurbulence
           type="fractalNoise"
           baseFrequency="0.04"
@@ -74,6 +92,12 @@ const finalOgDescription = ogDescription || description;
         />
       </filter>
     </svg>
+    <script is:inline>
+      // Firefox renders displacement maps more strongly, use lighter filter
+      if (/Firefox/.test(navigator.userAgent)) {
+        document.documentElement.style.setProperty('--doodly-filter', 'url(#handDrawnNoiseFirefox)');
+      }
+    </script>
     <slot />
   </body>
 </html>

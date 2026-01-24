@@ -92,7 +92,7 @@ export function AddCard({
     return (
       <div
         onClick={() => (addingTo.value = type)}
-        class="border-2 border-dashed border-sketch-medium rounded p-4 text-sketch-medium italic text-sm hand-drawn cursor-pointer hover:border-sketch-dark hover:text-sketch-dark hover:bg-white/40 transition-all"
+        class="rounded p-4 text-sketch-medium italic text-sm doodly-border-dashed cursor-pointer hover:text-sketch-dark hover:bg-white/40 transition-all"
       >
         {placeholder}
       </div>
@@ -100,7 +100,7 @@ export function AddCard({
   }
 
   return (
-    <div class="bg-white border-2 border-sketch-dark rounded p-2" style={{ willChange: 'contents' }}>
+    <div class="bg-white rounded p-2 doodly-border will-change-[contents]">
       <span
         ref={inputRef}
         role="textbox"
@@ -115,8 +115,7 @@ export function AddCard({
           }
           if (e.key === 'Escape') close();
         }}
-        class="block w-full bg-transparent text-sketch-dark text-sm outline-none leading-tight"
-        style="min-height: 1.5rem;"
+        class="block w-full bg-transparent text-sketch-dark text-sm outline-none leading-tight min-h-input"
       />
       <div class="flex justify-end gap-2 mt-2">
         <button onClick={close} disabled={addCard.isPending} class="btn-ghost btn-sm">
@@ -182,19 +181,14 @@ export function CardItem({
 
   return (
     <div
-      class={`min-h-16 group bg-white border-2 border-sketch-dark rounded p-3 hover:border-sketch-dark transition-colors relative cursor-text ${animClass} ${editing ? '' : 'hand-drawn'}`}
-      style={{ willChange: editing ? 'contents' : 'auto' }}
+      class={`min-h-16 group bg-white rounded p-3 transition-colors relative cursor-text ${animClass} ${editing ? 'border-2 border-sketch-dark' : 'doodly-border'}`}
       onClick={() => !editing && setEditing(true)}
     >
-      <div
-        class="float-right ml-2 mb-2"
-        style="shape-outside: circle(50%); width: 44px; height: 44px;"
-        onClick={e => e.stopPropagation()}
-      >
+      <div class="float-right ml-2 mb-2 size-vote-wrapper" onClick={e => e.stopPropagation()}>
         <VoteButton votes={card.votes} hasVoted={hasVoted} onClick={handleVote} />
       </div>
       {editing ? (
-        <div onClick={e => e.stopPropagation()} style="direction: ltr;">
+        <div onClick={e => e.stopPropagation()} class="dir-ltr">
           <span
             ref={el => {
               editRef.current = el;
@@ -234,9 +228,7 @@ export function CardItem({
           </div>
         </div>
       ) : (
-        <div class="text-sketch-dark text-sm leading-snug text-left" style="direction: ltr;">
-          {card.content}
-        </div>
+        <div class="text-sketch-dark text-sm leading-snug text-left dir-ltr">{card.content}</div>
       )}
     </div>
   );

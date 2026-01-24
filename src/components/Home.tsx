@@ -64,14 +64,12 @@ function HomeContent() {
     <div class="min-h-screen flex items-center justify-center p-4">
       <div class="w-full max-w-lg">
         <div class="text-center mb-8">
-          <h1 class="text-2xl md:text-3xl font-semibold text-sketch-dark mb-2 tracking-wider hand-drawn">
-            ~ Retrospective ~
-          </h1>
-          <div class="text-sketch-medium text-sm hand-drawn">═══════════════════════════════════</div>
+          <h1 class="text-2xl md:text-3xl font-semibold text-sketch-dark mb-2 tracking-wider">~ Retrospective ~</h1>
+          <div class="text-sketch-medium text-sm">═══════════════════════════════════</div>
         </div>
 
         <form onSubmit={handleCreate} class="mb-10">
-          <div class="border-2 border-sketch-dark bg-white/60 p-4 rounded hand-drawn">
+          <div class="bg-white/60 p-4 rounded doodly-border">
             <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider">Session Name:</label>
             <div class="flex gap-2">
               <input
@@ -96,18 +94,18 @@ function HomeContent() {
         <div class="text-center mb-8">
           <a
             href={`/${DEMO_SESSION_ID}`}
-            class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm hand-drawn underline"
+            class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm underline"
           >
             or try the demo →
           </a>
         </div>
 
         <div>
-          <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest hand-drawn">
+          <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest">
             ─── Sessions you created ───
           </div>
           {sessions.length === 0 ? (
-            <div class="text-center text-sketch-medium italic py-8 border-2 border-dashed border-sketch-medium rounded hand-drawn">
+            <div class="text-center text-sketch-medium italic py-8 rounded doodly-border-dashed">
               (No sessions yet? Create one above!)
             </div>
           ) : (
@@ -116,7 +114,7 @@ function HomeContent() {
                 <a
                   key={s.id}
                   href={`/${s.id}`}
-                  class="group block border-2 border-sketch-dark bg-white/60 hover:bg-white hover:border-sketch-dark transition-all rounded p-3 hand-drawn cursor-pointer"
+                  class="group block bg-white/60 hover:bg-white transition-all rounded p-3 doodly-border cursor-pointer"
                 >
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2 text-sketch-dark">
@@ -145,7 +143,7 @@ function HomeContent() {
 
         {deleteConfirm && (
           <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-white border-2 border-sketch-dark rounded p-6 max-w-sm mx-4 hand-drawn">
+            <div class="bg-white rounded p-6 max-w-sm mx-4 doodly-border">
               <h3 class="text-lg font-semibold text-sketch-dark mb-4">Delete Session?</h3>
               <p class="text-sketch-medium mb-6">
                 This will permanently delete the session and all its cards. This action cannot be undone.

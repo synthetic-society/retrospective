@@ -1,8 +1,18 @@
 @import 'tailwindcss';
-@import '@fontsource/ibm-plex-mono/latin-400.css';
+
+@font-face {
+  font-family: 'Annotation Mono';
+  src:
+    url('/annotation-mono-regular.woff2') format('woff2'),
+    url('/annotation-mono-regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @theme {
   /* Beige and monochrome colors */
+  --color-bg: #f5f0e8;
   --color-beige-light: #f5f0e8;
   --color-beige: #e8dcc8;
   --color-beige-dark: #d4c4a8;
@@ -12,12 +22,67 @@
   --color-sketch-light: #6a6a6a;
   --color-sketch-border: #3a3a3a;
 
-  --font-mono: 'IBM Plex Mono', monospace;
+  --font-mono: 'Annotation Mono', monospace;
+
+  --doodly-filter: url(#handDrawnNoise);
 }
 
-/* Hand-drawn filter */
-.hand-drawn {
-  filter: url(#handDrawnNoise);
+/* ===== Doodly Filter Utility ===== */
+@utility filter-doodly {
+  filter: var(--doodly-filter);
+}
+
+/* ===== Layout Utilities ===== */
+@utility min-h-input {
+  min-height: theme(spacing.6);
+}
+
+@utility size-vote-btn {
+  width: theme(spacing.10);
+  height: theme(spacing.10);
+}
+
+@utility size-vote-wrapper {
+  width: theme(spacing.11);
+  height: theme(spacing.11);
+  shape-outside: circle(50%);
+}
+
+@utility dir-ltr {
+  direction: ltr;
+}
+
+/* Doodly border effect - self-contained, no additional border classes needed */
+.doodly-border,
+.doodly-border-dashed,
+.doodly-border-b {
+  @apply relative border-none;
+  --doodly-border-style: solid;
+  --doodly-border-color: var(--color-sketch-dark);
+  --doodly-border-width: 2px;
+}
+
+.doodly-border::before,
+.doodly-border-dashed::before,
+.doodly-border-b::before {
+  @apply content-[''] absolute inset-0 rounded-[inherit] pointer-events-none filter-doodly;
+  border: var(--doodly-border-width) var(--doodly-border-style) var(--doodly-border-color);
+}
+
+/* Doodly dashed border variant */
+.doodly-border-dashed {
+  --doodly-border-style: dashed;
+  --doodly-border-color: var(--color-sketch-medium);
+}
+
+.doodly-border-dashed:hover {
+  --doodly-border-color: var(--color-sketch-dark);
+}
+
+/* Bottom border only doodly effect */
+.doodly-border-b::before {
+  border: none;
+  border-bottom: var(--doodly-border-width) var(--doodly-border-style) var(--doodly-border-color);
 }
 
 /* Wobble animation for doodly effect */
@@ -139,50 +204,28 @@
   will-change: transform, box-shadow;
 }
 
-/* Sketch-style borders */
-.sketch-border {
-  border: 2px solid var(--color-sketch-dark);
-  border-radius: 8px;
-  position: relative;
-  /* Use hand-drawn class instead of inline filter for consistency */
-}
-
-.sketch-border::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
-  border: 1px solid var(--color-sketch-medium);
-  border-radius: 8px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-/* Column spacing and borders */
-.columns-container {
-  display: grid;
-  gap: 1rem;
-  padding: 1rem;
-}
-
+/* Column styling */
 .column {
-  background: rgba(255, 255, 255, 0.6);
-  border: 3px solid var(--color-sketch-dark);
-  border-radius: 12px;
-  padding: 1rem;
-  position: relative;
-  filter: url(#handDrawnNoise);
+  @apply bg-white/60 rounded-xl p-4 relative border-none;
+  --doodly-border-style: solid;
+  --doodly-border-color: var(--color-sketch-dark);
+  --doodly-border-width: 2px;
   will-change: transform;
   contain: layout style;
 }
 
 .column::before {
-  content: '';
-  position: absolute;
-  inset: 3px;
+  @apply content-[''] absolute inset-0 rounded-[inherit] pointer-events-none filter-doodly;
+  border: var(--doodly-border-width) var(--doodly-border-style) var(--doodly-border-color);
+}
+
+/* Optional inner border effect */
+.column::after {
+  @apply content-[''] absolute pointer-events-none filter-doodly;
+  inset: 2px;
   border: 1px solid var(--color-sketch-medium);
   border-radius: 9px;
   opacity: 0.4;
-  pointer-events: none;
 }
 
 /* Auto-resize textarea */
@@ -192,17 +235,39 @@
   overflow: hidden;
 }
 
-/* Reusable button styles */
-.btn {
-  @apply border-2 rounded transition-all cursor-pointer;
+/* Reusable button styles - shared base properties */
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  @apply relative border-none rounded transition-all cursor-pointer;
+  --btn-border-color: var(--color-sketch-dark);
 }
 
+.btn-primary::before,
+.btn-secondary::before,
+.btn-danger::before {
+  @apply content-[''] absolute inset-0 rounded-[inherit] pointer-events-none filter-doodly;
+  border: 2px solid var(--btn-border-color);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-danger:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Button variants */
 .btn-primary {
-  @apply border-2 rounded transition-all cursor-pointer border-sketch-dark text-sketch-dark hover:bg-sketch-dark hover:text-beige-light;
+  @apply text-sketch-dark hover:bg-sketch-dark hover:text-beige-light;
 }
 
 .btn-secondary {
-  @apply border-2 rounded transition-all cursor-pointer border-sketch-medium text-sketch-medium hover:border-sketch-dark hover:text-sketch-dark;
+  @apply text-sketch-medium hover:text-sketch-dark;
+  --btn-border-color: var(--color-sketch-medium);
+}
+
+.btn-secondary:hover {
+  --btn-border-color: var(--color-sketch-dark);
 }
 
 .btn-ghost {
@@ -210,7 +275,12 @@
 }
 
 .btn-danger {
-  @apply border-2 rounded transition-all cursor-pointer border-red-400 text-red-500 hover:bg-red-500 hover:text-white hover:border-red-500;
+  @apply text-red-500 hover:bg-red-500 hover:text-white;
+  --btn-border-color: var(--color-red-400);
+}
+
+.btn-danger:hover {
+  --btn-border-color: var(--color-red-500);
 }
 
 .btn-sm {
@@ -221,15 +291,13 @@
   @apply text-sm px-3 py-2;
 }
 
-.btn:disabled,
-.btn-primary:disabled,
-.btn-secondary:disabled {
-  @apply opacity-50 cursor-not-allowed;
-}
-
 /* Reusable input styles */
 .input {
-  @apply bg-white border-2 border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus:outline-none transition-all;
-  /* filter removed for input performance - SVG turbulence causes input lag */
+  @apply bg-white border-1 border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus:outline-none transition-all relative filter-doodly;
+  @apply shadow-[0_0_0_1px_var(--color-sketch-medium)];
   will-change: border-color;
+}
+
+.input:focus {
+  @apply shadow-[0_0_0_1px_var(--color-sketch-dark)];
 }
