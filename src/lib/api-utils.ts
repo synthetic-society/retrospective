@@ -1,6 +1,6 @@
 import * as v from 'valibot';
-import { UUIDSchema } from './schemas';
 import { MAX_REQUEST_BODY_SIZE } from './constants';
+import { UUIDSchema } from './schemas';
 
 // Response helpers
 export const jsonResponse = (data: unknown, status = 200, cacheSeconds = 0) =>

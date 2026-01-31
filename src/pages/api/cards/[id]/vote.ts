@@ -1,6 +1,12 @@
 import type { APIContext } from 'astro';
 import * as v from 'valibot';
-import { jsonResponse, errorResponse, validationErrorResponse, validateUUID, parseJsonBody } from '../../../../lib/api-utils';
+import {
+  errorResponse,
+  jsonResponse,
+  parseJsonBody,
+  validateUUID,
+  validationErrorResponse,
+} from '../../../../lib/api-utils';
 import { getDB } from '../../../../lib/db';
 import { VoteSchema } from '../../../../lib/schemas';
 
@@ -47,10 +53,7 @@ export async function PATCH({ params, request, locals }: APIContext) {
     db.prepare('UPDATE cards SET votes = votes + 1 WHERE id = ?').bind(card_id),
   ]);
   return jsonResponse(
-    {
-      ...(await db.prepare('SELECT * FROM cards WHERE id = ?').bind(card_id).first()),
-      voted: true,
-    },
-    201
+    { ...(await db.prepare('SELECT * FROM cards WHERE id = ?').bind(card_id).first()), voted: true },
+    201,
   );
 }

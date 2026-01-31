@@ -1,15 +1,15 @@
 import type { APIContext } from 'astro';
 import * as v from 'valibot';
 import {
-  jsonResponse,
   errorResponse,
-  validationErrorResponse,
-  validateUUID,
   isSessionExpired,
+  jsonResponse,
+  validateUUID,
+  validationErrorResponse,
 } from '../../../../lib/api-utils';
+import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/constants';
 import { getDB } from '../../../../lib/db';
 import { VoterIdSchema } from '../../../../lib/schemas';
-import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/constants';
 
 export async function GET({ params, url, locals }: APIContext) {
   const { id: session_id } = params;
@@ -28,18 +28,18 @@ export async function GET({ params, url, locals }: APIContext) {
 
   const limit = Math.min(
     Math.max(1, parseInt(url.searchParams.get('limit') || '', 10) || DEFAULT_PAGE_LIMIT),
-    MAX_PAGE_LIMIT
+    MAX_PAGE_LIMIT,
   );
   const result = await db
     .prepare(
-      `SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ${limit}`
+      `SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ${limit}`,
     )
     .bind(session_id, parsed.output.voter_id)
     .all();
 
   return jsonResponse(
-    (result.results || []).map((r: any) => r.card_id),
+    ((result.results || []) as { card_id: string }[]).map((r) => r.card_id),
     200,
-    1
+    1,
   ); // 1s cache with stale-while-revalidate
 }

@@ -1,28 +1,29 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Board from '../components/Board.tsx';
-import { getDB } from '../lib/db';
-import { DEMO_SESSION_ID } from '../lib/constants';
+import Board from "../components/Board.tsx";
+import Layout from "../layouts/Layout.astro";
+import { DEMO_SESSION_ID } from "../lib/constants";
+import { getDB } from "../lib/db";
 
 const { id } = Astro.params;
 
 // Basic validation for UUID format
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const uuidRegex =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 if (!id || !uuidRegex.test(id)) {
-  return Astro.redirect('/');
+  return Astro.redirect("/");
 }
 
 const isDemo = id === DEMO_SESSION_ID;
 
 // Fetch session from database for SSR meta tags
 // Client will also fetch via API and update the UI
-let sessionName = isDemo ? 'Demo Board' : 'Retrospective Session';
+let sessionName = isDemo ? "Demo Board" : "Retrospective Session";
 let sessionCreatedAt = new Date().toISOString();
 if (!isDemo) {
   try {
     const db = getDB(Astro.locals);
     const result = await db
-      .prepare('SELECT name, created_at FROM sessions WHERE id = ?')
+      .prepare("SELECT name, created_at FROM sessions WHERE id = ?")
       .bind(id)
       .first<{ name: string; created_at: string }>();
     if (result) {
@@ -35,10 +36,10 @@ if (!isDemo) {
 }
 
 // Build canonical URL for this session
-const canonicalUrl = new URL(`/${id}`, Astro.site || Astro.url.origin).href;
+const _canonicalUrl = new URL(`/${id}`, Astro.site || Astro.url.origin).href;
 
 // Session object passed to client - serves as initial data for React Query
-const session = { id, name: sessionName, created_at: sessionCreatedAt };
+const _session = { id, name: sessionName, created_at: sessionCreatedAt };
 ---
 
 <Layout
@@ -47,7 +48,7 @@ const session = { id, name: sessionName, created_at: sessionCreatedAt };
   ogTitle={sessionName}
   ogDescription="Join this retrospective session to share feedback collectively and anonymously."
   ogType="article"
-  canonicalUrl={canonicalUrl}
+  canonicalUrl={_canonicalUrl}
 >
-  <Board session={session} isDemo={isDemo} client:only="preact" />
+  <Board session={_session} isDemo={isDemo} client:only="preact" />
 </Layout>

@@ -7,7 +7,7 @@ const trimmedString = (max: number) =>
     v.string(),
     v.minLength(1),
     v.maxLength(max),
-    v.transform(s => s.trim())
+    v.transform((s) => s.trim()),
   );
 export const UUIDSchema = v.pipe(v.string(), v.uuid());
 

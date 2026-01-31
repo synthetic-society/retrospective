@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 // Helper to create a session and navigate to it
 async function createSession(page: Page, name: string) {
@@ -18,13 +18,14 @@ async function addCard(page: Page, content: string) {
 
   // Wait for the API response when adding
   const responsePromise = page.waitForResponse(
-    resp => resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST'
+    (resp) =>
+      resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST',
   );
-  await page.getByRole('button', { name: 'Add' }).click();
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
   await responsePromise;
 
   // Wait for the "Add" button to disappear (form closes after adding)
-  await expect(page.getByRole('button', { name: 'Add' })).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
   // And the card text should be visible somewhere on the page
   await expect(page.getByText(content)).toBeVisible();
 }
@@ -32,7 +33,7 @@ async function addCard(page: Page, content: string) {
 // Helper to click vote and wait for API response
 async function clickVote(page: Page, voteButton: ReturnType<Page['getByRole']>) {
   const responsePromise = page.waitForResponse(
-    resp => resp.url().includes('/api/cards/') && resp.url().includes('/vote') && resp.request().method() === 'PATCH'
+    (resp) => resp.url().includes('/api/cards/') && resp.url().includes('/vote') && resp.request().method() === 'PATCH',
   );
   await voteButton.click();
   await responsePromise;

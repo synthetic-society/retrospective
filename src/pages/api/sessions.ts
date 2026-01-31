@@ -1,6 +1,6 @@
 import type { APIContext } from 'astro';
 import * as v from 'valibot';
-import { jsonResponse, validationErrorResponse, parseJsonBody } from '../../lib/api-utils';
+import { jsonResponse, parseJsonBody, validationErrorResponse } from '../../lib/api-utils';
 import { getDB } from '../../lib/db';
 import { CreateSessionSchema } from '../../lib/schemas';
 

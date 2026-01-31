@@ -1,4 +1,4 @@
-import { test, expect, type Page, type BrowserContext } from '@playwright/test';
+import { type BrowserContext, expect, type Page, test } from '@playwright/test';
 
 // Helper to create a session and return the session URL
 async function createSession(page: Page, name: string): Promise<string> {
@@ -95,7 +95,7 @@ test.describe('Admin Token', () => {
 
     // Wait for delete API call
     const deletePromise = page.waitForResponse(
-      resp => resp.url().includes('/api/sessions/') && resp.request().method() === 'DELETE'
+      (resp) => resp.url().includes('/api/sessions/') && resp.request().method() === 'DELETE',
     );
     await page.getByRole('button', { name: 'Delete' }).last().click();
     await deletePromise;

@@ -1,8 +1,14 @@
 import type { APIContext } from 'astro';
 import * as v from 'valibot';
-import { jsonResponse, errorResponse, validationErrorResponse, validateUUID, parseJsonBody } from '../../../lib/api-utils';
+import {
+  errorResponse,
+  jsonResponse,
+  parseJsonBody,
+  validateUUID,
+  validationErrorResponse,
+} from '../../../lib/api-utils';
 import { getDB } from '../../../lib/db';
-import { UpdateCardSchema, DeleteCardSchema } from '../../../lib/schemas';
+import { DeleteCardSchema, UpdateCardSchema } from '../../../lib/schemas';
 
 export async function PATCH({ params, request, locals }: APIContext) {
   const { id } = params;
@@ -30,7 +36,7 @@ export async function PATCH({ params, request, locals }: APIContext) {
   const sets = [content !== undefined && 'content = ?', column_type !== undefined && 'column_type = ?'].filter(Boolean);
   if (!sets.length) return errorResponse('No fields to update');
 
-  const values = [content, column_type].filter(val => val !== undefined);
+  const values = [content, column_type].filter((val) => val !== undefined);
   await db
     .prepare(`UPDATE cards SET ${sets.join(', ')} WHERE id = ?`)
     .bind(...values, id)

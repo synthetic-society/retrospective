@@ -7,6 +7,7 @@ interface VoteButtonProps {
 export default function VoteButton({ votes, hasVoted, onClick }: VoteButtonProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       class="relative font-mono transition-all cursor-pointer active:animate-[heartBounce_0.4s_ease-in-out] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2 rounded-full size-vote-btn"
       title={hasVoted ? 'Remove vote' : 'Vote'}
@@ -16,6 +17,7 @@ export default function VoteButton({ votes, hasVoted, onClick }: VoteButtonProps
       {/* Heart SVG */}
       <svg
         viewBox="0 0 24 24"
+        aria-hidden="true"
         class={`absolute inset-0 w-full h-full transition-all stroke-2 filter-doodly ${
           hasVoted ? 'fill-sketch-dark stroke-sketch-dark' : 'fill-none stroke-sketch-medium hover:stroke-sketch-dark'
         }`}

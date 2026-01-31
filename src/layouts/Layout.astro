@@ -13,17 +13,17 @@ interface Props {
 
 const {
   title,
-  description = 'A minimal retrospective board',
+  description = "A minimal retrospective board",
   ogTitle,
   ogDescription,
-  ogType = 'website',
+  ogType = "website",
   ogImage,
   canonicalUrl,
 } = Astro.props;
 
-const siteName = 'retrospective';
-const finalOgTitle = ogTitle || title;
-const finalOgDescription = ogDescription || description;
+const _siteName = "retrospective";
+const _finalOgTitle = ogTitle || title;
+const _finalOgDescription = ogDescription || description;
 ---
 
 <!doctype html>
@@ -37,16 +37,16 @@ const finalOgDescription = ogDescription || description;
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={ogType} />
-    <meta property="og:site_name" content={siteName} />
-    <meta property="og:title" content={finalOgTitle} />
-    <meta property="og:description" content={finalOgDescription} />
+    <meta property="og:site_name" content={_siteName} />
+    <meta property="og:title" content={_finalOgTitle} />
+    <meta property="og:description" content={_finalOgDescription} />
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     {ogImage && <meta property="og:image" content={ogImage} />}
 
     <!-- Twitter -->
     <meta name="twitter:card" content={ogImage ? 'summary_large_image' : 'summary'} />
-    <meta name="twitter:title" content={finalOgTitle} />
-    <meta name="twitter:description" content={finalOgDescription} />
+    <meta name="twitter:title" content={_finalOgTitle} />
+    <meta name="twitter:description" content={_finalOgDescription} />
     {ogImage && <meta name="twitter:image" content={ogImage} />}
 
     <!-- Preload font -->

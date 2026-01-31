@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 // Helper to create a session and navigate to it
 async function createSession(page: Page, name: string) {
@@ -9,7 +9,9 @@ async function createSession(page: Page, name: string) {
   await expect(page.getByRole('heading', { name })).toBeVisible();
   // Return the session ID from the URL
   const url = page.url();
-  return url.split('/').pop()!;
+  const sessionId = url.split('/').pop();
+  if (!sessionId) throw new Error('Session ID not found in URL');
+  return sessionId;
 }
 
 // Helper to add a card to the "glad" column
@@ -17,11 +19,12 @@ async function addCard(page: Page, content: string) {
   await page.getByText("I'm glad that…").click();
   await page.getByRole('textbox').first().fill(content);
   const responsePromise = page.waitForResponse(
-    resp => resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST'
+    (resp) =>
+      resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST',
   );
-  await page.getByRole('button', { name: 'Add' }).click();
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
   await responsePromise;
-  await expect(page.getByRole('button', { name: 'Add' })).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
   await expect(page.getByText(content)).toBeVisible();
 }
 
@@ -32,13 +35,14 @@ test.describe('Session Expiry', () => {
 
     // Set an artificially old expiry date (5 days from now) in localStorage
     const oldExpiry = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
-    await page.evaluate(({ sessionId, oldExpiry }) => {
-      const sessions = JSON.parse(localStorage.getItem('retro_sessions') || '[]');
-      const updated = sessions.map((s: { id: string }) =>
-        s.id === sessionId ? { ...s, expires_at: oldExpiry } : s
-      );
-      localStorage.setItem('retro_sessions', JSON.stringify(updated));
-    }, { sessionId, oldExpiry });
+    await page.evaluate(
+      ({ sessionId, oldExpiry }) => {
+        const sessions = JSON.parse(localStorage.getItem('retro_sessions') || '[]');
+        const updated = sessions.map((s: { id: string }) => (s.id === sessionId ? { ...s, expires_at: oldExpiry } : s));
+        localStorage.setItem('retro_sessions', JSON.stringify(updated));
+      },
+      { sessionId, oldExpiry },
+    );
 
     // Verify the old expiry is set (should show "Expires in 5 days")
     await page.goto('/');
@@ -54,7 +58,7 @@ test.describe('Session Expiry', () => {
     // Wait for the session query to be invalidated and refetched
     // The mutation's onSuccess invalidates the session query, which refetches and updates localStorage
     await page.waitForResponse(
-      resp => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET'
+      (resp) => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET',
     );
 
     // Navigate back to home
@@ -75,18 +79,19 @@ test.describe('Session Expiry', () => {
 
     // Wait for session refetch after adding card
     await page.waitForResponse(
-      resp => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET'
+      (resp) => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET',
     );
 
     // Now set an old expiry date AFTER the card was added
     const oldExpiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    await page.evaluate(({ sessionId, oldExpiry }) => {
-      const sessions = JSON.parse(localStorage.getItem('retro_sessions') || '[]');
-      const updated = sessions.map((s: { id: string }) =>
-        s.id === sessionId ? { ...s, expires_at: oldExpiry } : s
-      );
-      localStorage.setItem('retro_sessions', JSON.stringify(updated));
-    }, { sessionId, oldExpiry });
+    await page.evaluate(
+      ({ sessionId, oldExpiry }) => {
+        const sessions = JSON.parse(localStorage.getItem('retro_sessions') || '[]');
+        const updated = sessions.map((s: { id: string }) => (s.id === sessionId ? { ...s, expires_at: oldExpiry } : s));
+        localStorage.setItem('retro_sessions', JSON.stringify(updated));
+      },
+      { sessionId, oldExpiry },
+    );
 
     // Verify the old expiry is set by navigating to home
     await page.goto('/');
@@ -99,14 +104,14 @@ test.describe('Session Expiry', () => {
     // Click vote button
     const voteButton = page.getByRole('button', { name: /vote/i }).first();
     const voteResponsePromise = page.waitForResponse(
-      resp => resp.url().includes('/api/cards/') && resp.url().includes('/vote')
+      (resp) => resp.url().includes('/api/cards/') && resp.url().includes('/vote'),
     );
     await voteButton.click();
     await voteResponsePromise;
 
     // Wait for session refetch after voting
     await page.waitForResponse(
-      resp => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET'
+      (resp) => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET',
     );
 
     // Navigate back to home
@@ -123,13 +128,14 @@ test.describe('Session Expiry', () => {
 
     // Set an old expiry
     const oldExpiry = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toISOString();
-    await page.evaluate(({ sessionId, oldExpiry }) => {
-      const sessions = JSON.parse(localStorage.getItem('retro_sessions') || '[]');
-      const updated = sessions.map((s: { id: string }) =>
-        s.id === sessionId ? { ...s, expires_at: oldExpiry } : s
-      );
-      localStorage.setItem('retro_sessions', JSON.stringify(updated));
-    }, { sessionId, oldExpiry });
+    await page.evaluate(
+      ({ sessionId, oldExpiry }) => {
+        const sessions = JSON.parse(localStorage.getItem('retro_sessions') || '[]');
+        const updated = sessions.map((s: { id: string }) => (s.id === sessionId ? { ...s, expires_at: oldExpiry } : s));
+        localStorage.setItem('retro_sessions', JSON.stringify(updated));
+      },
+      { sessionId, oldExpiry },
+    );
 
     // Go to home, verify old expiry
     await page.goto('/');
@@ -144,7 +150,7 @@ test.describe('Session Expiry', () => {
 
     // Wait for session refetch in the new tab
     await newPage.waitForResponse(
-      resp => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET'
+      (resp) => resp.url().includes(`/api/sessions/${sessionId}`) && resp.request().method() === 'GET',
     );
 
     // Close the new tab - this triggers visibilitychange on the original tab

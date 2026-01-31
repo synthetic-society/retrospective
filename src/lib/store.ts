@@ -29,7 +29,10 @@ export const getVoterId = (sessionId: string): string => {
   if (!isBrowser) return '';
   const key = `retro_voter_${sessionId}`;
   let id = localStorage.getItem(key);
-  if (!id) localStorage.setItem(key, (id = crypto.randomUUID()));
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
   return id;
 };
 
@@ -39,17 +42,17 @@ export const getSessionHistory = (): Session[] => storage(SESSIONS_KEY, []);
 
 export const addToSessionHistory = (session: Session): void => {
   if (!isBrowser) return;
-  const sessions = getSessionHistory().filter(s => s.id !== session.id);
+  const sessions = getSessionHistory().filter((s) => s.id !== session.id);
   localStorage.setItem(SESSIONS_KEY, JSON.stringify([session, ...sessions].slice(0, 20)));
 };
 
 export const removeFromSessionHistory = (id: string): void => {
   if (!isBrowser) return;
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify(getSessionHistory().filter(s => s.id !== id)));
+  localStorage.setItem(SESSIONS_KEY, JSON.stringify(getSessionHistory().filter((s) => s.id !== id)));
 };
 
 export const getAdminToken = (sessionId: string): string | undefined => {
-  return getSessionHistory().find(s => s.id === sessionId)?.admin_token;
+  return getSessionHistory().find((s) => s.id === sessionId)?.admin_token;
 };
 
 export const hasAdminToken = (sessionId: string): boolean => {

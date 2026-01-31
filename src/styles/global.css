@@ -1,10 +1,10 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @font-face {
-  font-family: 'Annotation Mono';
+  font-family: "Annotation Mono";
   src:
-    url('/annotation-mono-regular.woff2') format('woff2'),
-    url('/annotation-mono-regular.otf') format('opentype');
+    url("/annotation-mono-regular.woff2") format("woff2"),
+    url("/annotation-mono-regular.otf") format("opentype");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -22,7 +22,7 @@
   --color-sketch-light: #6a6a6a;
   --color-sketch-border: #3a3a3a;
 
-  --font-mono: 'Annotation Mono', monospace;
+  --font-mono: "Annotation Mono", monospace;
 
   --doodly-filter: url(#handDrawnNoise);
 }
@@ -66,7 +66,8 @@
 .doodly-border-dashed::before,
 .doodly-border-b::before {
   @apply content-[''] absolute inset-0 rounded-[inherit] pointer-events-none filter-doodly;
-  border: var(--doodly-border-width) var(--doodly-border-style) var(--doodly-border-color);
+  border: var(--doodly-border-width) var(--doodly-border-style)
+    var(--doodly-border-color);
 }
 
 /* Doodly dashed border variant */
@@ -82,7 +83,8 @@
 /* Bottom border only doodly effect */
 .doodly-border-b::before {
   border: none;
-  border-bottom: var(--doodly-border-width) var(--doodly-border-style) var(--doodly-border-color);
+  border-bottom: var(--doodly-border-width) var(--doodly-border-style)
+    var(--doodly-border-color);
 }
 
 /* Wobble animation for doodly effect */
@@ -216,7 +218,8 @@
 
 .column::before {
   @apply content-[''] absolute inset-0 rounded-[inherit] pointer-events-none filter-doodly;
-  border: var(--doodly-border-width) var(--doodly-border-style) var(--doodly-border-color);
+  border: var(--doodly-border-width) var(--doodly-border-style)
+    var(--doodly-border-color);
 }
 
 /* Optional inner border effect */
@@ -293,7 +296,7 @@
 
 /* Reusable input styles */
 .input {
-  @apply bg-white border-1 border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus:outline-none transition-all relative filter-doodly;
+  @apply bg-white border border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus:outline-none transition-all relative filter-doodly;
   @apply shadow-[0_0_0_1px_var(--color-sketch-medium)];
   will-change: border-color;
 }

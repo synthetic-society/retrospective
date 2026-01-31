@@ -1,5 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import { expect, type Page, test } from '@playwright/test';
 
 // Helper to create a session and return the URL
 async function createSession(page: Page, name: string): Promise<string> {
@@ -16,11 +16,12 @@ async function addCard(page: Page, content: string) {
   await page.getByText("I'm glad that…").click();
   await page.getByRole('textbox').first().fill(content);
   const responsePromise = page.waitForResponse(
-    resp => resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST'
+    (resp) =>
+      resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST',
   );
-  await page.getByRole('button', { name: 'Add' }).click();
+  await page.getByRole('button', { name: 'Add', exact: true }).click();
   await responsePromise;
-  await expect(page.getByRole('button', { name: 'Add' })).not.toBeVisible();
+  await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
 }
 
 test.describe('Accessibility', () => {

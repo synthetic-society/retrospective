@@ -1,6 +1,12 @@
 import type { APIContext } from 'astro';
 import * as v from 'valibot';
-import { jsonResponse, errorResponse, validateUUID, isSessionExpired, validationErrorResponse } from '../../../lib/api-utils';
+import {
+  errorResponse,
+  isSessionExpired,
+  jsonResponse,
+  validateUUID,
+  validationErrorResponse,
+} from '../../../lib/api-utils';
 import { getDB } from '../../../lib/db';
 import { DeleteSessionSchema } from '../../../lib/schemas';
 

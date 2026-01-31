@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'preact/hooks';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { DEMO_SESSION_ID } from '../lib/constants';
+import { createQueryClient, useCreateSession, useDeleteSession } from '../lib/queries';
 import type { Session } from '../lib/store';
 import { getSessionHistory, hasAdminToken } from '../lib/store';
-import { useCreateSession, useDeleteSession, createQueryClient } from '../lib/queries';
-import { DEMO_SESSION_ID } from '../lib/constants';
 
 // Native date formatter
 const formatDate = (dateStr: string) => {
@@ -79,12 +79,15 @@ function HomeContent() {
 
         <form onSubmit={handleCreate} class="mb-10">
           <div class="bg-white/60 p-4 rounded doodly-border">
-            <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider">Session Name:</label>
+            <label class="block text-sketch-medium text-xs mb-2 uppercase tracking-wider" for="session-name">
+              Session Name:
+            </label>
             <div class="flex gap-2">
               <input
+                id="session-name"
                 type="text"
                 value={name}
-                onInput={e => setName((e.target as HTMLInputElement).value)}
+                onInput={(e) => setName((e.target as HTMLInputElement).value)}
                 placeholder="Sprint 42 Retro"
                 class="input flex-1 font-mono text-sm"
                 disabled={create.isPending}
@@ -119,7 +122,7 @@ function HomeContent() {
             </div>
           ) : (
             <div class="space-y-2">
-              {sessions.map(s => (
+              {sessions.map((s) => (
                 <a
                   key={s.id}
                   href={`/${s.id}`}
@@ -132,7 +135,8 @@ function HomeContent() {
                     </div>
                     {hasAdminToken(s.id) && (
                       <button
-                        onClick={e => handleDeleteClick(s.id, e)}
+                        type="button"
+                        onClick={(e) => handleDeleteClick(s.id, e)}
                         class="btn-danger btn-sm uppercase tracking-wider"
                         title="Delete session"
                       >
@@ -159,12 +163,14 @@ function HomeContent() {
               </p>
               <div class="flex gap-3 justify-end">
                 <button
+                  type="button"
                   onClick={() => setDeleteConfirm(null)}
                   class="px-4 py-2 border-2 border-sketch-dark rounded hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={handleDeleteConfirm}
                   disabled={deleteSession.isPending}
                   class="px-4 py-2 bg-red-500 text-white border-2 border-red-600 rounded hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50"

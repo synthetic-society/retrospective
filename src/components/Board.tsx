@@ -1,8 +1,8 @@
-import { useRef, useEffect } from 'preact/hooks';
 import { signal } from '@preact/signals';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useEffect, useRef } from 'preact/hooks';
+import { createQueryClient, useCards, useSession, useVotes } from '../lib/queries';
 import type { Card, ColumnType, Session } from '../lib/store';
-import { createQueryClient, useSession, useCards, useVotes } from '../lib/queries';
 import { AddCard, CardItem } from './Card';
 
 const COLUMNS: { type: ColumnType; title: string; placeholder: string }[] = [
@@ -40,12 +40,12 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
 
   const getPositions = (list: Card[]) =>
     new Map(
-      COLUMNS.flatMap(col =>
+      COLUMNS.flatMap((col) =>
         list
-          .filter(c => c.column_type === col.type)
+          .filter((c) => c.column_type === col.type)
           .sort((a, b) => b.votes - a.votes)
-          .map((card, i) => [card.id, { column: col.type, index: i }] as const)
-      )
+          .map((card, i) => [card.id, { column: col.type, index: i }] as const),
+      ),
     );
 
   useEffect(() => {
@@ -58,11 +58,13 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           return [[id, np.index < op.index ? 'up' : 'down'] as const];
         }
         return [];
-      })
+      }),
     );
     if (anims.size) {
       animating.value = anims;
-      setTimeout(() => (animating.value = new Map()), 400);
+      setTimeout(() => {
+        animating.value = new Map();
+      }, 400);
     }
     prevPositions.current = newPos;
   }, [cards]);
@@ -81,7 +83,9 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
   const handleShare = async () => {
     await navigator.clipboard.writeText(window.location.href);
     copied.value = true;
-    setTimeout(() => (copied.value = false), 2000);
+    setTimeout(() => {
+      copied.value = false;
+    }, 2000);
   };
 
   const toggleMusic = () => {
@@ -91,7 +95,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
   };
 
   const getColumnCards = (type: ColumnType) =>
-    cards.filter(c => c.column_type === type).sort((a, b) => b.votes - a.votes);
+    cards.filter((c) => c.column_type === type).sort((a, b) => b.votes - a.votes);
 
   if (isLoading) {
     return (
@@ -101,59 +105,71 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
     );
   }
 
-  const fullscreenCol = fullscreenColumn.value ? COLUMNS.find(c => c.type === fullscreenColumn.value) : null;
+  const fullscreenCol = fullscreenColumn.value ? COLUMNS.find((c) => c.type === fullscreenColumn.value) : null;
   const fullscreenCards = fullscreenColumn.value ? getColumnCards(fullscreenColumn.value) : [];
 
   return (
     <div class="min-h-screen flex flex-col">
       {/* Fullscreen overlay */}
       {fullscreenCol && (
-        <div class="fixed inset-0 z-50 bg-beige-light/95 overflow-auto" onClick={() => (fullscreenColumn.value = null)}>
-          <div
-            class="sticky top-0 z-10 bg-beige-light p-4 flex items-center justify-between doodly-border-b"
-            onClick={e => e.stopPropagation()}
-          >
-            <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
-              {fullscreenCol.title} ({fullscreenCards.length})
-            </h2>
-            <button
-              onClick={() => (fullscreenColumn.value = null)}
-              class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
-              title="Close fullscreen"
-              aria-label="Close fullscreen"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                class="w-4 h-4"
-                aria-hidden="true"
+        <div class="fixed inset-0 z-50 overflow-auto">
+          {/* Backdrop - click to close */}
+          <button
+            type="button"
+            class="absolute inset-0 w-full h-full bg-beige-light/95 cursor-default"
+            onClick={() => {
+              fullscreenColumn.value = null;
+            }}
+            aria-label="Close fullscreen overlay"
+          />
+          {/* Content */}
+          <div class="relative z-10">
+            <div class="sticky top-0 z-10 bg-beige-light p-4 flex items-center justify-between doodly-border-b">
+              <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
+                {fullscreenCol.title} ({fullscreenCards.length})
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  fullscreenColumn.value = null;
+                }}
+                class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+                title="Close fullscreen"
+                aria-label="Close fullscreen"
               >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-          <div class="p-6" onClick={e => e.stopPropagation()}>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {fullscreenCards.map(card => (
-                <CardItem
-                  key={card.id}
-                  card={card}
-                  sessionId={session.id}
-                  hasVoted={votedIds.has(card.id)}
-                  animation={animating.value.get(card.id)}
-                  isDemo={isDemo}
-                />
-              ))}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  class="w-4 h-4"
+                  aria-hidden="true"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
             </div>
-            {fullscreenCards.length === 0 && (
-              <div class="text-center text-sketch-medium italic py-12">No cards in this column yet</div>
-            )}
+            <div class="p-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {fullscreenCards.map((card) => (
+                  <CardItem
+                    key={card.id}
+                    card={card}
+                    sessionId={session.id}
+                    hasVoted={votedIds.has(card.id)}
+                    animation={animating.value.get(card.id)}
+                    isDemo={isDemo}
+                  />
+                ))}
+              </div>
+              {fullscreenCards.length === 0 && (
+                <div class="text-center text-sketch-medium italic py-12">No cards in this column yet</div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -165,6 +181,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
         <h1 class="text-sketch-dark font-medium truncate mx-4">{session.name}</h1>
         <div class="flex gap-2">
           <button
+            type="button"
             onClick={toggleMusic}
             class="btn-primary btn-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
             title={isPlaying.value ? 'Pause background music' : 'Play background music'}
@@ -182,6 +199,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
             </svg>
           </button>
           <button
+            type="button"
             onClick={handleShare}
             class="btn-primary btn-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
             aria-label={copied.value ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
@@ -193,13 +211,16 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
       </header>
 
       <div class="flex-1 md:grid md:grid-cols-4 md:gap-4 md:p-4 overflow-y-auto">
-        {COLUMNS.map(col => {
+        {COLUMNS.map((col) => {
           const columnCards = getColumnCards(col.type);
           const isExpanded = expandedColumn.value === col.type;
           return (
             <div key={col.type}>
               <button
-                onClick={() => (expandedColumn.value = isExpanded ? null : col.type)}
+                type="button"
+                onClick={() => {
+                  expandedColumn.value = isExpanded ? null : col.type;
+                }}
                 class="md:hidden w-full p-3 flex items-center justify-between bg-white/60 doodly-border cursor-pointer hover:bg-white transition-all mx-2 my-2"
               >
                 <div class="flex items-center gap-2">
@@ -213,7 +234,8 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                 <div class="hidden md:flex p-3 border-b-2 border-sketch-dark items-center justify-between">
                   <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">{col.title}</h2>
                   <button
-                    onClick={e => {
+                    type="button"
+                    onClick={(e) => {
                       e.stopPropagation();
                       fullscreenColumn.value = col.type;
                     }}
@@ -238,15 +260,18 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                 </div>
                 <div class="flex-1 overflow-y-auto p-2 space-y-2">
                   {col.type === 'action' && columnCards.length === 0 && addingTo.value !== 'action' ? (
-                    <div
-                      onClick={() => (addingTo.value = 'action')}
-                      class="border-2 border-dashed border-sketch-light/50 rounded p-4 text-sketch-light text-sm cursor-pointer hover:border-sketch-medium hover:text-sketch-medium hover:bg-white/20 transition-all duration-200"
+                    <button
+                      type="button"
+                      onClick={() => {
+                        addingTo.value = 'action';
+                      }}
+                      class="w-full border-2 border-dashed border-sketch-light/50 rounded p-4 text-sketch-light text-sm cursor-pointer hover:border-sketch-medium hover:text-sketch-medium hover:bg-white/20 transition-all duration-200"
                     >
                       <div class="text-center">
                         <span class="italic">Waiting for everyone to have filled the other columns first…</span>
                         <span class="block text-xs mt-2 opacity-60">Click to add an action anyway</span>
                       </div>
-                    </div>
+                    </button>
                   ) : (
                     <AddCard
                       sessionId={session.id}
@@ -256,7 +281,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                       isDemo={isDemo}
                     />
                   )}
-                  {columnCards.map(card => (
+                  {columnCards.map((card) => (
                     <CardItem
                       key={card.id}
                       card={card}

@@ -1,8 +1,8 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Home from '../components/Home.tsx';
+import Home from "../components/Home.tsx";
+import Layout from "../layouts/Layout.astro";
 
-const canonicalUrl = new URL('/', Astro.site || Astro.url.origin).href;
+const _canonicalUrl = new URL("/", Astro.site || Astro.url.origin).href;
 ---
 
 <Layout
@@ -10,7 +10,7 @@ const canonicalUrl = new URL('/', Astro.site || Astro.url.origin).href;
   description="Create and share real-time retrospective boards with your team. Organize feedback into feedback and action columns."
   ogTitle="retrospective - Team Retrospective Board"
   ogDescription="Create and share real-time retrospective boards with your team. Collect feedback, vote on items, and collaborate on actions."
-  canonicalUrl={canonicalUrl}
+  canonicalUrl={_canonicalUrl}
 >
   <Home client:only="preact" />
 </Layout>

@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from 'preact/hooks';
 import type { Signal } from '@preact/signals';
-import type { Card, ColumnType } from '../lib/store';
-import { useAddCard, useUpdateCard, useDeleteCard, useToggleVote } from '../lib/queries';
+import { useEffect, useRef, useState } from 'preact/hooks';
 import { MAX_CARD_CONTENT_LENGTH } from '../lib/constants';
+import { useAddCard, useDeleteCard, useToggleVote, useUpdateCard } from '../lib/queries';
+import type { Card, ColumnType } from '../lib/store';
 import VoteButton from './VoteButton';
 
 const sanitizeInput = (text: string) => text.replace(/<[^>]*>/g, '').substring(0, MAX_CARD_CONTENT_LENGTH);
@@ -90,25 +90,30 @@ export function AddCard({
 
   if (!isActive) {
     return (
-      <div
-        onClick={() => (addingTo.value = type)}
-        class="rounded p-4 text-sketch-medium italic text-sm doodly-border-dashed cursor-pointer hover:text-sketch-dark hover:bg-white/40 transition-all"
+      <button
+        type="button"
+        onClick={() => {
+          addingTo.value = type;
+        }}
+        class="w-full text-left rounded p-4 text-sketch-medium italic text-sm doodly-border-dashed cursor-pointer hover:text-sketch-dark hover:bg-white/40 transition-all"
       >
         {placeholder}
-      </div>
+      </button>
     );
   }
 
   return (
-    <div class="bg-white rounded p-2 doodly-border will-change-[contents]">
+    <div class="bg-white rounded p-2 doodly-border will-change-contents">
+      {/* biome-ignore lint/a11y/useSemanticElements: contenteditable span is intentional for inline editing */}
       <span
         ref={inputRef}
         role="textbox"
+        tabIndex={0}
         aria-label="Card content"
         contenteditable
         onInput={handleInput}
         onPaste={handlePaste}
-        onKeyDown={e => {
+        onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
             submit();
@@ -118,10 +123,15 @@ export function AddCard({
         class="block w-full bg-transparent text-sketch-dark text-sm outline-none leading-tight min-h-input"
       />
       <div class="flex justify-end gap-2 mt-2">
-        <button onClick={close} disabled={addCard.isPending} class="btn-ghost btn-sm">
+        <button type="button" onClick={close} disabled={addCard.isPending} class="btn-ghost btn-sm">
           Cancel
         </button>
-        <button onClick={submit} disabled={addCard.isPending || !content.trim()} class="btn-primary btn-sm">
+        <button
+          type="button"
+          onClick={submit}
+          disabled={addCard.isPending || !content.trim()}
+          class="btn-primary btn-sm"
+        >
           {addCard.isPending ? '...' : 'Add'}
         </button>
       </div>
@@ -173,7 +183,9 @@ export function CardItem({
       setEditing(false);
     }
     if (e.key === 'Escape') {
-      editRef.current && (editRef.current.textContent = card.content);
+      if (editRef.current) {
+        editRef.current.textContent = card.content;
+      }
       setContent(card.content);
       setEditing(false);
     }
@@ -181,16 +193,16 @@ export function CardItem({
 
   return (
     <div
-      class={`min-h-16 group bg-white rounded p-3 transition-colors relative cursor-text ${animClass} ${editing ? 'border-2 border-sketch-dark' : 'doodly-border'}`}
-      onClick={() => !editing && setEditing(true)}
+      class={`min-h-16 group bg-white rounded p-3 transition-colors relative ${animClass} ${editing ? 'border-2 border-sketch-dark' : 'doodly-border'}`}
     >
-      <div class="float-right ml-2 mb-2 size-vote-wrapper" onClick={e => e.stopPropagation()}>
+      <div class="float-right ml-2 mb-2 size-vote-wrapper">
         <VoteButton votes={card.votes} hasVoted={hasVoted} onClick={handleVote} />
       </div>
       {editing ? (
-        <div onClick={e => e.stopPropagation()} class="dir-ltr">
+        <div class="dir-ltr">
+          {/* biome-ignore lint/a11y/useSemanticElements: contenteditable span is intentional for inline editing */}
           <span
-            ref={el => {
+            ref={(el) => {
               editRef.current = el;
               if (el && editing) {
                 if (!el.textContent) el.textContent = content;
@@ -206,6 +218,7 @@ export function CardItem({
               }
             }}
             role="textbox"
+            tabIndex={0}
             aria-label="Edit card content"
             contenteditable
             onInput={handleChange}
@@ -215,11 +228,22 @@ export function CardItem({
             class="block w-full bg-transparent text-sketch-dark text-sm outline-none leading-snug text-left"
           />
           <div class="flex justify-end gap-2 mt-2 clear-right">
-            <button onMouseDown={e => (e.preventDefault(), setEditing(false))} class="btn-ghost btn-sm">
+            <button
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setEditing(false);
+              }}
+              class="btn-ghost btn-sm"
+            >
               cancel
             </button>
             <button
-              onMouseDown={e => (e.preventDefault(), deleteCard.mutate(card.id))}
+              type="button"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                deleteCard.mutate(card.id);
+              }}
               disabled={deleteCard.isPending}
               class="btn-secondary btn-sm"
             >
@@ -228,7 +252,22 @@ export function CardItem({
           </div>
         </div>
       ) : (
-        <div class="text-sketch-dark text-sm leading-snug text-left dir-ltr">{card.content}</div>
+        // biome-ignore lint/a11y/useSemanticElements: div with role="button" for click-to-edit behavior
+        <div
+          role="button"
+          tabIndex={0}
+          aria-label="Click to edit card"
+          class="text-sketch-dark text-sm leading-snug text-left dir-ltr cursor-text"
+          onClick={() => setEditing(true)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              setEditing(true);
+            }
+          }}
+        >
+          {card.content}
+        </div>
       )}
     </div>
   );
