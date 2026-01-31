@@ -28,6 +28,15 @@ function HomeContent() {
 
   useEffect(() => {
     setSessions(getSessionHistory());
+    // Re-read localStorage when returning to this page (e.g., after visiting a board)
+    // The board's useSession() fetches fresh expires_at from the server and updates localStorage
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        setSessions(getSessionHistory());
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const handleCreate = async (e: Event) => {

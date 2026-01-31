@@ -152,7 +152,10 @@ export const useAddCard = (sessionId: string, isDemo = false) => {
       }
       return api.post(`sessions/${sessionId}/cards`, { json: { column_type: columnType, content } }).json<Card>();
     },
-    onSuccess: card => qc.setQueryData<Card[]>(queryKeys.cards(sessionId), old => [...(old || []), card]),
+    onSuccess: card => {
+      qc.setQueryData<Card[]>(queryKeys.cards(sessionId), old => [...(old || []), card]);
+      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
+    },
   });
 };
 
@@ -168,8 +171,10 @@ export const useUpdateCard = (sessionId: string, isDemo = false) => {
       }
       return api.patch(`cards/${id}`, { json: { session_id: sessionId, content } }).json<Card>();
     },
-    onSuccess: card =>
-      qc.setQueryData<Card[]>(queryKeys.cards(sessionId), old => old?.map(c => (c.id === card.id ? card : c)) ?? []),
+    onSuccess: card => {
+      qc.setQueryData<Card[]>(queryKeys.cards(sessionId), old => old?.map(c => (c.id === card.id ? card : c)) ?? []);
+      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
+    },
   });
 };
 
@@ -186,6 +191,9 @@ export const useDeleteCard = (sessionId: string, isDemo = false) => {
       const prev = qc.getQueryData<Card[]>(key);
       qc.setQueryData<Card[]>(key, old => old?.filter(c => c.id !== id) ?? []);
       return { prev };
+    },
+    onSuccess: () => {
+      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
     },
     onError: (_, __, ctx) => ctx?.prev && qc.setQueryData(key, ctx.prev),
   });
@@ -216,6 +224,9 @@ export const useToggleVote = (sessionId: string, isDemo = false) => {
         old => old?.map(c => (c.id === cardId ? { ...c, votes: Math.max(0, c.votes + (hasVoted ? -1 : 1)) } : c)) ?? []
       );
       return { prevCards, prevVotes };
+    },
+    onSuccess: () => {
+      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
     },
     onError: (_, __, ctx) => {
       if (isDemo) return; // Don't rollback in demo mode
