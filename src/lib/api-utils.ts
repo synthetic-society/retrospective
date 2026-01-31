@@ -1,4 +1,4 @@
-import type { ZodError } from 'zod';
+import * as v from 'valibot';
 import { UUIDSchema } from './schemas';
 import { MAX_REQUEST_BODY_SIZE } from './constants';
 
@@ -16,11 +16,11 @@ export const jsonResponse = (data: unknown, status = 200, cacheSeconds = 0) =>
 
 export const errorResponse = (message: string, status = 400) => jsonResponse({ error: { message, status } }, status);
 
-export const zodErrorResponse = (error: ZodError) =>
-  errorResponse(error.issues[0]?.message || 'Validation failed', 400);
+export const validationErrorResponse = (issues: v.BaseIssue<unknown>[]) =>
+  errorResponse(issues[0]?.message || 'Validation failed', 400);
 
 // Validation helpers
-export const validateUUID = (id: string | undefined): id is string => !!id && UUIDSchema.safeParse(id).success;
+export const validateUUID = (id: string | undefined): id is string => !!id && v.safeParse(UUIDSchema, id).success;
 
 export const isSessionExpired = (expiresAt: string | null | undefined) =>
   !!expiresAt && new Date(expiresAt) < new Date();

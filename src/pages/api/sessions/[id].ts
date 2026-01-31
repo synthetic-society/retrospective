@@ -1,5 +1,6 @@
 import type { APIContext } from 'astro';
-import { jsonResponse, errorResponse, validateUUID, isSessionExpired, zodErrorResponse } from '../../../lib/api-utils';
+import * as v from 'valibot';
+import { jsonResponse, errorResponse, validateUUID, isSessionExpired, validationErrorResponse } from '../../../lib/api-utils';
 import { getDB } from '../../../lib/db';
 import { DeleteSessionSchema } from '../../../lib/schemas';
 
@@ -21,8 +22,8 @@ export async function DELETE({ params, locals, url }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
 
-  const parsed = DeleteSessionSchema.safeParse({ admin_token: url.searchParams.get('admin_token') });
-  if (!parsed.success) return zodErrorResponse(parsed.error);
+  const parsed = v.safeParse(DeleteSessionSchema, { admin_token: url.searchParams.get('admin_token') });
+  if (!parsed.success) return validationErrorResponse(parsed.issues);
 
   const db = getDB(locals);
   const session = await db
@@ -31,7 +32,7 @@ export async function DELETE({ params, locals, url }: APIContext) {
     .first<{ id: string; admin_token: string }>();
 
   if (!session) return errorResponse('Session not found', 404);
-  if (session.admin_token !== parsed.data.admin_token) {
+  if (session.admin_token !== parsed.output.admin_token) {
     return errorResponse('Forbidden', 403);
   }
 

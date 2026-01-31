@@ -1,5 +1,6 @@
 import type { APIContext } from 'astro';
-import { jsonResponse, zodErrorResponse, parseJsonBody } from '../../lib/api-utils';
+import * as v from 'valibot';
+import { jsonResponse, validationErrorResponse, parseJsonBody } from '../../lib/api-utils';
 import { getDB } from '../../lib/db';
 import { CreateSessionSchema } from '../../lib/schemas';
 
@@ -9,8 +10,8 @@ export async function POST({ request, locals }: APIContext) {
   const { data: body, error } = await parseJsonBody(request);
   if (error) return error;
 
-  const parsed = CreateSessionSchema.safeParse(body);
-  if (!parsed.success) return zodErrorResponse(parsed.error);
+  const parsed = v.safeParse(CreateSessionSchema, body);
+  if (!parsed.success) return validationErrorResponse(parsed.issues);
 
   const id = crypto.randomUUID();
   const admin_token = crypto.randomUUID();
@@ -19,8 +20,8 @@ export async function POST({ request, locals }: APIContext) {
 
   await getDB(locals)
     .prepare('INSERT INTO sessions (id, name, created_at, expires_at, admin_token) VALUES (?, ?, ?, ?, ?)')
-    .bind(id, parsed.data.name, created_at, expires_at, admin_token)
+    .bind(id, parsed.output.name, created_at, expires_at, admin_token)
     .run();
 
-  return jsonResponse({ id, name: parsed.data.name, created_at, expires_at, admin_token }, 201);
+  return jsonResponse({ id, name: parsed.output.name, created_at, expires_at, admin_token }, 201);
 }

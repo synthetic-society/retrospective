@@ -1,5 +1,6 @@
 import type { APIContext } from 'astro';
-import { jsonResponse, errorResponse, zodErrorResponse, validateUUID, parseJsonBody } from '../../../../lib/api-utils';
+import * as v from 'valibot';
+import { jsonResponse, errorResponse, validationErrorResponse, validateUUID, parseJsonBody } from '../../../../lib/api-utils';
 import { getDB } from '../../../../lib/db';
 import { VoteSchema } from '../../../../lib/schemas';
 
@@ -10,10 +11,10 @@ export async function PATCH({ params, request, locals }: APIContext) {
   const { data: body, error } = await parseJsonBody(request);
   if (error) return error;
 
-  const parsed = VoteSchema.safeParse(body);
-  if (!parsed.success) return zodErrorResponse(parsed.error);
+  const parsed = v.safeParse(VoteSchema, body);
+  if (!parsed.success) return validationErrorResponse(parsed.issues);
 
-  const { voter_id, session_id } = parsed.data;
+  const { voter_id, session_id } = parsed.output;
   const db = getDB(locals);
 
   // Verify card belongs to the claimed session (session-scoped authorization)

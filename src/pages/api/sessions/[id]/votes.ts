@@ -1,8 +1,9 @@
 import type { APIContext } from 'astro';
+import * as v from 'valibot';
 import {
   jsonResponse,
   errorResponse,
-  zodErrorResponse,
+  validationErrorResponse,
   validateUUID,
   isSessionExpired,
 } from '../../../../lib/api-utils';
@@ -14,8 +15,8 @@ export async function GET({ params, url, locals }: APIContext) {
   const { id: session_id } = params;
   if (!validateUUID(session_id)) return errorResponse('Invalid session ID', 400);
 
-  const parsed = VoterIdSchema.safeParse({ voter_id: url.searchParams.get('voter_id') });
-  if (!parsed.success) return zodErrorResponse(parsed.error);
+  const parsed = v.safeParse(VoterIdSchema, { voter_id: url.searchParams.get('voter_id') });
+  if (!parsed.success) return validationErrorResponse(parsed.issues);
 
   const db = getDB(locals);
   const session = await db
@@ -33,7 +34,7 @@ export async function GET({ params, url, locals }: APIContext) {
     .prepare(
       `SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ${limit}`
     )
-    .bind(session_id, parsed.data.voter_id)
+    .bind(session_id, parsed.output.voter_id)
     .all();
 
   return jsonResponse(

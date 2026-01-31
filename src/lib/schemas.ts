@@ -1,31 +1,32 @@
-import { z } from 'zod';
+import * as v from 'valibot';
 import { MAX_CARD_CONTENT_LENGTH } from './constants';
 
 // Shared helpers
 const trimmedString = (max: number) =>
-  z
-    .string()
-    .min(1)
-    .max(max)
-    .transform(s => s.trim());
-export const UUIDSchema = z.string().uuid();
+  v.pipe(
+    v.string(),
+    v.minLength(1),
+    v.maxLength(max),
+    v.transform(s => s.trim())
+  );
+export const UUIDSchema = v.pipe(v.string(), v.uuid());
 
 // Column types
-export const ColumnTypeSchema = z.enum(['glad', 'wondering', 'sad', 'action']);
-export type ColumnType = z.infer<typeof ColumnTypeSchema>;
+export const ColumnTypeSchema = v.picklist(['glad', 'wondering', 'sad', 'action']);
+export type ColumnType = v.InferOutput<typeof ColumnTypeSchema>;
 
 // Schemas
-export const CreateSessionSchema = z.object({ name: trimmedString(100) });
-export const CreateCardSchema = z.object({
+export const CreateSessionSchema = v.object({ name: trimmedString(100) });
+export const CreateCardSchema = v.object({
   column_type: ColumnTypeSchema,
   content: trimmedString(MAX_CARD_CONTENT_LENGTH),
 });
-export const UpdateCardSchema = z.object({
+export const UpdateCardSchema = v.object({
   session_id: UUIDSchema,
-  content: trimmedString(MAX_CARD_CONTENT_LENGTH).optional(),
-  column_type: ColumnTypeSchema.optional(),
+  content: v.optional(trimmedString(MAX_CARD_CONTENT_LENGTH)),
+  column_type: v.optional(ColumnTypeSchema),
 });
-export const DeleteCardSchema = z.object({ session_id: UUIDSchema });
-export const DeleteSessionSchema = z.object({ admin_token: UUIDSchema });
-export const VoterIdSchema = z.object({ voter_id: UUIDSchema });
-export const VoteSchema = z.object({ session_id: UUIDSchema, voter_id: UUIDSchema });
+export const DeleteCardSchema = v.object({ session_id: UUIDSchema });
+export const DeleteSessionSchema = v.object({ admin_token: UUIDSchema });
+export const VoterIdSchema = v.object({ voter_id: UUIDSchema });
+export const VoteSchema = v.object({ session_id: UUIDSchema, voter_id: UUIDSchema });

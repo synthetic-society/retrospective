@@ -1,8 +1,9 @@
 import type { APIContext } from 'astro';
+import * as v from 'valibot';
 import {
   jsonResponse,
   errorResponse,
-  zodErrorResponse,
+  validationErrorResponse,
   validateUUID,
   isSessionExpired,
   parseJsonBody,
@@ -45,8 +46,8 @@ export async function POST({ params, request, locals }: APIContext) {
   const { data: body, error: parseError } = await parseJsonBody(request);
   if (parseError) return parseError;
 
-  const parsed = CreateCardSchema.safeParse(body);
-  if (!parsed.success) return zodErrorResponse(parsed.error);
+  const parsed = v.safeParse(CreateCardSchema, body);
+  if (!parsed.success) return validationErrorResponse(parsed.issues);
 
   const db = getDB(locals);
   const { error } = await getValidSession(db, session_id);
@@ -54,7 +55,7 @@ export async function POST({ params, request, locals }: APIContext) {
 
   const id = crypto.randomUUID();
   const created_at = new Date().toISOString();
-  const { column_type, content } = parsed.data;
+  const { column_type, content } = parsed.output;
 
   await db
     .prepare('INSERT INTO cards (id, session_id, column_type, content, votes, created_at) VALUES (?, ?, ?, ?, 0, ?)')
