@@ -1,10 +1,27 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
-import ky from 'ky';
 import type { Session, Card, ColumnType } from './store';
 import { getVoterId, addToSessionHistory, removeFromSessionHistory, getAdminToken } from './store';
 import { DEMO_SESSION_ID } from './constants';
 
-const api = ky.extend({ prefixUrl: '/api', timeout: 10000 });
+const request = (url: string, options?: RequestInit) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 10000);
+  const promise = fetch(`/api/${url}`, { ...options, signal: controller.signal }).then(res => {
+    clearTimeout(timeout);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res;
+  });
+  return { json: <T>() => promise.then(r => r.json() as Promise<T>) };
+};
+
+const api = {
+  get: (url: string) => request(url),
+  post: (url: string, opts: { json: unknown }) =>
+    request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts.json) }),
+  patch: (url: string, opts: { json: unknown }) =>
+    request(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts.json) }),
+  delete: (url: string) => fetch(`/api/${url}`, { method: 'DELETE' }),
+};
 
 // Demo cards to seed the demo board
 const DEMO_CARDS: Card[] = [
