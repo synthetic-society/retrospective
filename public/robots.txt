@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://retrospective.rocher.lc/sitemap.xml
