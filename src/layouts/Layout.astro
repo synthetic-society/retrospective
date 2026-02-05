@@ -58,8 +58,9 @@ const _finalOgDescription = ogDescription || description;
     <ClientRouter />
   </head>
   <body class="font-mono text-sketch-dark min-h-screen bg-bg">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-100 focus:bg-sketch-dark focus:text-beige-light focus:px-4 focus:py-2 focus:rounded focus:text-sm">Skip to main content</a>
     <!-- Hand-drawn SVG filter -->
-    <svg height="0" width="0" class="absolute">
+    <svg height="0" width="0" class="absolute" aria-hidden="true">
       <!-- Default filter (stronger for Chrome/Safari/WebKit) -->
       <filter id="handDrawnNoise" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
         <feTurbulence
@@ -101,7 +102,7 @@ const _finalOgDescription = ogDescription || description;
         document.documentElement.style.setProperty('--doodly-filter', 'url(#handDrawnNoiseFirefox)');
       }
     </script>
-    <main>
+    <main id="main-content">
       <slot />
     </main>
   </body>

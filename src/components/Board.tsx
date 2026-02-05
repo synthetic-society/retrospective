@@ -1,6 +1,7 @@
 import { signal } from '@preact/signals';
 import { QueryClientProvider } from '@tanstack/react-query';
-import { useEffect, useRef } from 'preact/hooks';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { useFocusTrap } from '../lib/focus-trap';
 import { createQueryClient, useCards, useSession, useVotes } from '../lib/queries';
 import type { Card, ColumnType, Session } from '../lib/store';
 import { AddCard, CardItem } from './Card';
@@ -83,6 +84,27 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  // Live region: announce card count changes from polling
+  const prevCardCount = useRef<number | null>(null);
+  const [announcement, setAnnouncement] = useState('');
+  useEffect(() => {
+    if (prevCardCount.current === null) {
+      prevCardCount.current = cards.length;
+      return;
+    }
+    const diff = cards.length - prevCardCount.current;
+    prevCardCount.current = cards.length;
+    if (diff > 0) {
+      setAnnouncement(`${diff} new card${diff > 1 ? 's' : ''} added`);
+    } else if (diff < 0) {
+      setAnnouncement(`${Math.abs(diff)} card${Math.abs(diff) > 1 ? 's' : ''} removed`);
+    }
+    if (diff !== 0) {
+      const t = setTimeout(() => setAnnouncement(''), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [cards.length]);
+
   const handleShare = async () => {
     await navigator.clipboard.writeText(window.location.href);
     copied.value = true;
@@ -97,13 +119,17 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
     isPlaying.value = !isPlaying.value;
   };
 
+  const fullscreenTrapRef = useFocusTrap(fullscreenColumn.value !== null);
+
   const getColumnCards = (type: ColumnType) =>
     cards.filter((c) => c.column_type === type).sort((a, b) => b.votes - a.votes);
 
   if (isLoading) {
     return (
-      <div class="min-h-screen flex items-center justify-center">
+      // biome-ignore lint/a11y/useSemanticElements: preact doesn't support <output> element
+      <div role="status" class="min-h-screen flex items-center justify-center" aria-busy="true">
         <div class="text-sketch-dark">~ Loading ~</div>
+        <span class="sr-only">Loading board</span>
       </div>
     );
   }
@@ -115,10 +141,17 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
     <div class="min-h-screen flex flex-col">
       {/* Fullscreen overlay */}
       {fullscreenCol && (
-        <div class="fixed inset-0 z-50 overflow-auto">
+        <div
+          ref={fullscreenTrapRef}
+          class="fixed inset-0 z-50 overflow-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="fullscreen-dialog-title"
+        >
           {/* Backdrop - click to close */}
           <button
             type="button"
+            tabIndex={-1}
             class="absolute inset-0 w-full h-full bg-beige-light/95 cursor-default"
             onClick={() => {
               fullscreenColumn.value = null;
@@ -128,7 +161,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           {/* Content */}
           <div class="relative z-10">
             <div class="sticky top-0 z-10 bg-beige-light p-4 flex items-center justify-between doodly-border-b">
-              <h2 class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
+              <h2 id="fullscreen-dialog-title" class="text-sketch-dark uppercase tracking-widest text-lg font-semibold">
                 {fullscreenCol.title} ({fullscreenCards.length})
               </h2>
               <button
@@ -136,7 +169,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                 onClick={() => {
                   fullscreenColumn.value = null;
                 }}
-                class="btn-primary btn-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+                class="btn-primary btn-sm"
                 title="Close fullscreen"
                 aria-label="Close fullscreen"
               >
@@ -157,20 +190,22 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
               </button>
             </div>
             <div class="p-6">
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {fullscreenCards.map((card) => (
-                  <CardItem
-                    key={card.id}
-                    card={card}
-                    sessionId={session.id}
-                    hasVoted={votedIds.has(card.id)}
-                    animation={animating.value.get(card.id)}
-                    isDemo={isDemo}
-                  />
-                ))}
-              </div>
-              {fullscreenCards.length === 0 && (
-                <div class="text-center text-sketch-medium italic py-12">No cards in this column yet</div>
+              {fullscreenCards.length === 0 ? (
+                <p class="text-center text-sketch-medium italic py-12">No cards in this column yet</p>
+              ) : (
+                <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 list-none p-0 m-0">
+                  {fullscreenCards.map((card) => (
+                    <li key={card.id}>
+                      <CardItem
+                        card={card}
+                        sessionId={session.id}
+                        hasVoted={votedIds.has(card.id)}
+                        animation={animating.value.get(card.id)}
+                        isDemo={isDemo}
+                      />
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           </div>
@@ -178,15 +213,17 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
       )}
 
       <header class="bg-white/40 p-3 flex items-center justify-between doodly-border-b">
-        <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">
-          ← Back
-        </a>
+        <nav aria-label="Board navigation">
+          <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">
+            <span aria-hidden="true">← </span>Back
+          </a>
+        </nav>
         <h1 class="text-sketch-dark font-medium truncate mx-4">{session.name}</h1>
         <div class="flex gap-2">
           <button
             type="button"
             onClick={toggleMusic}
-            class="btn-primary btn-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            class="btn-primary btn-md"
             title={isPlaying.value ? 'Pause background music' : 'Play background music'}
             aria-label={isPlaying.value ? 'Pause background music' : 'Play background music'}
             aria-pressed={isPlaying.value}
@@ -204,7 +241,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           <button
             type="button"
             onClick={handleShare}
-            class="btn-primary btn-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sketch-dark focus-visible:ring-offset-2"
+            class="btn-primary btn-md"
             aria-label={copied.value ? 'Link copied to clipboard' : 'Copy share link to clipboard'}
             aria-live="polite"
           >
@@ -218,24 +255,36 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           const columnCards = getColumnCards(col.type);
           const isExpanded = expandedColumn.value === col.type;
           return (
-            <div key={col.type}>
+            <section key={col.type} aria-labelledby={`heading-${col.type}`}>
+              <h2 id={`heading-${col.type}`} class="sr-only">
+                {col.title}
+              </h2>
               <button
                 type="button"
                 onClick={() => {
                   expandedColumn.value = isExpanded ? null : col.type;
                 }}
+                aria-expanded={isExpanded}
+                aria-controls={`column-${col.type}`}
                 class="md:hidden w-full p-3 flex items-center justify-between bg-white/60 doodly-border cursor-pointer hover:bg-white transition-all mx-2 my-2"
               >
                 <div class="flex items-center gap-2">
-                  <span class="text-sketch-dark">{isExpanded ? '▼' : '►'}</span>
+                  <span class="text-sketch-dark" aria-hidden="true">
+                    {isExpanded ? '▼' : '►'}
+                  </span>
                   <span class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">
                     {col.title} ({columnCards.length})
                   </span>
                 </div>
               </button>
-              <div class={`${isExpanded ? 'block' : 'hidden'} md:flex md:flex-col column bg-white/60`}>
+              <div
+                id={`column-${col.type}`}
+                class={`${isExpanded ? 'block' : 'hidden'} md:flex md:flex-col column bg-white/60`}
+              >
                 <div class="hidden md:flex p-3 border-b-2 border-sketch-dark items-center justify-between">
-                  <h2 class="text-sketch-dark uppercase tracking-widest text-sm font-semibold">{col.title}</h2>
+                  <span class="text-sketch-dark uppercase tracking-widest text-sm font-semibold" aria-hidden="true">
+                    {col.title}
+                  </span>
                   <button
                     type="button"
                     onClick={(e) => {
@@ -272,7 +321,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                     >
                       <div class="text-center">
                         <span class="italic">Waiting for everyone to have filled the other columns first…</span>
-                        <span class="block text-xs mt-2 opacity-60">Click to add an action anyway</span>
+                        <span class="block text-xs mt-2 text-sketch-medium">Click to add an action anyway</span>
                       </div>
                     </button>
                   ) : (
@@ -284,21 +333,28 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                       isDemo={isDemo}
                     />
                   )}
-                  {columnCards.map((card) => (
-                    <CardItem
-                      key={card.id}
-                      card={card}
-                      sessionId={session.id}
-                      hasVoted={votedIds.has(card.id)}
-                      animation={animating.value.get(card.id)}
-                      isDemo={isDemo}
-                    />
-                  ))}
+                  <ul class="space-y-2 list-none p-0 m-0">
+                    {columnCards.map((card) => (
+                      <li key={card.id}>
+                        <CardItem
+                          card={card}
+                          sessionId={session.id}
+                          hasVoted={votedIds.has(card.id)}
+                          animation={animating.value.get(card.id)}
+                          isDemo={isDemo}
+                        />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </div>
-            </div>
+            </section>
           );
         })}
+      </div>
+      {/* biome-ignore lint/a11y/useSemanticElements: div with role="status" used because Preact doesn't support <output> */}
+      <div role="status" class="sr-only" aria-live="polite" aria-atomic="true">
+        {announcement}
       </div>
     </div>
   );

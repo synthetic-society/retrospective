@@ -110,6 +110,7 @@ export function AddCard({
         role="textbox"
         tabIndex={0}
         aria-label="Card content"
+        aria-describedby={`card-char-limit-${type}`}
         contenteditable
         onInput={handleInput}
         onPaste={handlePaste}
@@ -122,6 +123,9 @@ export function AddCard({
         }}
         class="block w-full bg-transparent text-sketch-dark text-sm outline-none leading-tight min-h-input"
       />
+      <span id={`card-char-limit-${type}`} class="sr-only">
+        Maximum {MAX_CARD_CONTENT_LENGTH} characters
+      </span>
       <div class="flex justify-end gap-2 mt-2">
         <button type="button" onClick={close} disabled={addCard.isPending} class="btn-ghost btn-sm">
           Cancel
@@ -256,7 +260,7 @@ export function CardItem({
         <div
           role="button"
           tabIndex={0}
-          aria-label="Click to edit card"
+          aria-label={`Edit card: ${card.content}`}
           class="text-sketch-dark text-sm leading-snug text-left dir-ltr cursor-text"
           onClick={() => setEditing(true)}
           onKeyDown={(e) => {

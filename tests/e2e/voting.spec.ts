@@ -26,8 +26,8 @@ async function addCard(page: Page, content: string) {
 
   // Wait for the "Add" button to disappear (form closes after adding)
   await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
-  // And the card text should be visible somewhere on the page
-  await expect(page.getByText(content)).toBeVisible();
+  // And the card should be visible (use aria-label to avoid matching live region)
+  await expect(page.getByRole('button', { name: `Edit card: ${content}` })).toBeVisible();
 }
 
 // Helper to click vote and wait for API response
@@ -90,10 +90,10 @@ test.describe('Voting', () => {
     await addCard(page, 'Card C');
 
     // Verify initial order: Card A (0), Card B (1), Card C (2) - all have 0 votes
-    // All cards have text visible
-    await expect(page.getByText('Card A')).toBeVisible();
-    await expect(page.getByText('Card B')).toBeVisible();
-    await expect(page.getByText('Card C')).toBeVisible();
+    // All cards have text visible (use role to avoid matching live region)
+    await expect(page.getByRole('button', { name: 'Edit card: Card A' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit card: Card B' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Edit card: Card C' })).toBeVisible();
 
     // Get all vote buttons
     const voteButtons = page.getByRole('button', { name: /vote/i });

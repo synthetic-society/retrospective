@@ -69,4 +69,54 @@ test.describe('Accessibility', () => {
 
     expect(results.violations).toEqual([]);
   });
+
+  test('fullscreen dialog has no accessibility violations', async ({ page }) => {
+    const sessionName = `A11y Fullscreen ${Date.now()}`;
+    await createSession(page, sessionName);
+    await addCard(page, 'Fullscreen a11y test');
+
+    // Open fullscreen view
+    await page.getByRole('button', { name: 'View What went well fullscreen' }).click();
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await page.waitForLoadState('networkidle');
+
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+
+    expect(results.violations).toEqual([]);
+  });
+
+  test('delete confirmation dialog has no accessibility violations', async ({ page }) => {
+    const sessionName = `A11y Delete ${Date.now()}`;
+    await createSession(page, sessionName);
+
+    // Go back to home to see the session list
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Click delete on the session we created
+    const deleteButton = page.getByRole('button', { name: 'Delete' }).first();
+    if (await deleteButton.isVisible()) {
+      await deleteButton.click();
+      await expect(page.getByRole('alertdialog')).toBeVisible();
+
+      const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze();
+
+      expect(results.violations).toEqual([]);
+
+      // Close dialog
+      await page.getByRole('button', { name: 'Cancel' }).click();
+    }
+  });
+
+  test('reduced motion disables animations and doodly filter', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/');
+    await page.waitForLoadState('networkidle');
+
+    // Verify --doodly-filter is none
+    const filterValue = await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--doodly-filter').trim(),
+    );
+    expect(filterValue).toBe('none');
+  });
 });

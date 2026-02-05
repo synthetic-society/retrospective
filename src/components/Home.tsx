@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'preact/hooks';
 import { DEMO_SESSION_ID } from '../lib/constants';
+import { useFocusTrap } from '../lib/focus-trap';
 import { createQueryClient, useCreateSession, useDeleteSession } from '../lib/queries';
 import type { Session } from '../lib/store';
 import { getSessionHistory, hasAdminToken } from '../lib/store';
@@ -28,6 +29,7 @@ function HomeContent() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const create = useCreateSession();
   const deleteSession = useDeleteSession();
+  const deleteTrapRef = useFocusTrap(deleteConfirm !== null);
 
   useEffect(() => {
     setSessions(getSessionHistory());
@@ -77,7 +79,12 @@ function HomeContent() {
       <div class="w-full max-w-lg">
         <div class="text-center mb-8">
           <h1 class="text-2xl md:text-3xl font-semibold text-sketch-dark mb-2 tracking-wider">~ Retrospective ~</h1>
-          <div class="text-sketch-medium text-sm">═══════════════════════════════════</div>
+          <div class="text-sketch-medium text-sm" aria-hidden="true">
+            ═══════════════════════════════════
+          </div>
+          <p class="sr-only">
+            A collaborative retrospective board. Create a session, share the link, and collect feedback anonymously.
+          </p>
         </div>
 
         <form onSubmit={handleCreate} class="mb-10">
@@ -94,6 +101,7 @@ function HomeContent() {
                 placeholder="Sprint 42 Retro"
                 class="input flex-1 font-mono text-sm"
                 disabled={create.isPending}
+                required
               />
               <button
                 type="submit"
@@ -115,53 +123,66 @@ function HomeContent() {
           </a>
         </div>
 
-        <div>
-          <div class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest">
-            ─── Sessions you created ───
-          </div>
+        <nav aria-label="Your sessions">
+          <h2 class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest">
+            <span aria-hidden="true">─── </span>Sessions you created<span aria-hidden="true"> ───</span>
+          </h2>
           {sessions.length === 0 ? (
-            <div class="text-center text-sketch-medium italic py-8 rounded doodly-border-dashed">
-              (No sessions yet? Create one above!)
-            </div>
+            <p class="text-center text-sketch-medium italic py-8 rounded doodly-border-dashed">
+              No sessions yet. Create one above!
+            </p>
           ) : (
-            <div class="space-y-2">
+            <ul class="space-y-2 list-none p-0 m-0">
               {sessions.map((s) => (
-                <a
-                  key={s.id}
-                  href={`/${s.id}`}
-                  class="group block bg-white/60 hover:bg-white transition-all rounded p-3 doodly-border cursor-pointer"
-                >
-                  <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 text-sketch-dark">
-                      <span>▸</span>
-                      <span class="font-medium">{s.name}</span>
+                <li key={s.id}>
+                  <a
+                    href={`/${s.id}`}
+                    class="group block bg-white/60 hover:bg-white transition-all rounded p-3 doodly-border cursor-pointer"
+                  >
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-center gap-2 text-sketch-dark">
+                        <span aria-hidden="true">▸</span>
+                        <span class="font-medium">{s.name}</span>
+                      </div>
+                      {hasAdminToken(s.id) && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteClick(s.id, e)}
+                          class="btn-danger btn-sm uppercase tracking-wider"
+                          title="Delete session"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </div>
-                    {hasAdminToken(s.id) && (
-                      <button
-                        type="button"
-                        onClick={(e) => handleDeleteClick(s.id, e)}
-                        class="btn-danger btn-sm uppercase tracking-wider"
-                        title="Delete session"
-                      >
-                        Delete
-                      </button>
-                    )}
-                  </div>
-                  <div class="flex justify-between items-center text-sketch-medium text-xs mt-1 ml-5">
-                    <span>{formatDate(s.created_at)}</span>
-                    {s.expires_at && <span class="text-sketch-medium/70">{formatExpiry(s.expires_at)}</span>}
-                  </div>
-                </a>
+                    <div class="flex justify-between items-center text-sketch-medium text-xs mt-1 ml-5">
+                      <span>{formatDate(s.created_at)}</span>
+                      {s.expires_at && <span class="text-sketch-medium">{formatExpiry(s.expires_at)}</span>}
+                    </div>
+                  </a>
+                </li>
               ))}
-            </div>
+            </ul>
           )}
-        </div>
+        </nav>
 
         {deleteConfirm && (
-          <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div
+            ref={deleteTrapRef}
+            class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+            aria-describedby="delete-dialog-desc"
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') setDeleteConfirm(null);
+            }}
+          >
             <div class="bg-white rounded p-6 max-w-sm mx-4 doodly-border">
-              <h3 class="text-lg font-semibold text-sketch-dark mb-4">Delete Session?</h3>
-              <p class="text-sketch-medium mb-6">
+              <h3 id="delete-dialog-title" class="text-lg font-semibold text-sketch-dark mb-4">
+                Delete Session?
+              </h3>
+              <p id="delete-dialog-desc" class="text-sketch-medium mb-6">
                 This will permanently delete the session and all its cards. This action cannot be undone.
               </p>
               <div class="flex gap-3 justify-end">
@@ -176,7 +197,7 @@ function HomeContent() {
                   type="button"
                   onClick={handleDeleteConfirm}
                   disabled={deleteSession.isPending}
-                  class="px-4 py-2 bg-red-500 text-white border-2 border-red-600 rounded hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50"
+                  class="px-4 py-2 bg-red-700 text-white border-2 border-red-800 rounded hover:bg-red-800 transition-colors cursor-pointer disabled:opacity-50"
                 >
                   {deleteSession.isPending ? 'Deleting...' : 'Delete'}
                 </button>

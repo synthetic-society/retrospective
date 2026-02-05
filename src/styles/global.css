@@ -19,7 +19,7 @@
 
   --color-sketch-dark: #2a2a2a;
   --color-sketch-medium: #4a4a4a;
-  --color-sketch-light: #6a6a6a;
+  --color-sketch-light: #555555;
   --color-sketch-border: #3a3a3a;
 
   --font-mono: "Annotation Mono", monospace;
@@ -30,6 +30,30 @@
 /* ===== Doodly Filter Utility ===== */
 @utility filter-doodly {
   filter: var(--doodly-filter);
+}
+
+/* ===== Screen Reader Only ===== */
+@utility sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+@utility not-sr-only {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
 }
 
 /* ===== Layout Utilities ===== */
@@ -242,7 +266,7 @@
 .btn-primary,
 .btn-secondary,
 .btn-danger {
-  @apply relative border-none rounded transition-all cursor-pointer;
+  @apply relative border-none rounded transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sketch-dark;
   --btn-border-color: var(--color-sketch-dark);
 }
 
@@ -278,12 +302,12 @@
 }
 
 .btn-danger {
-  @apply text-red-500 hover:bg-red-500 hover:text-white;
-  --btn-border-color: var(--color-red-400);
+  @apply text-red-700 hover:bg-red-600 hover:text-white;
+  --btn-border-color: var(--color-red-600);
 }
 
 .btn-danger:hover {
-  --btn-border-color: var(--color-red-500);
+  --btn-border-color: var(--color-red-700);
 }
 
 .btn-sm {
@@ -296,11 +320,45 @@
 
 /* Reusable input styles */
 .input {
-  @apply bg-white border border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus:outline-none transition-all relative filter-doodly;
+  @apply bg-white border border-sketch-medium text-sketch-dark px-3 py-2 rounded focus:border-sketch-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sketch-dark transition-all relative filter-doodly;
   @apply shadow-[0_0_0_1px_var(--color-sketch-medium)];
   will-change: border-color;
 }
 
 .input:focus {
   @apply shadow-[0_0_0_1px_var(--color-sketch-dark)];
+}
+
+/* ===== Reduced Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore lint/complexity/noImportantStyles: required for reduced motion override */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required for reduced motion override */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required for reduced motion override */
+    transition-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: required for reduced motion override */
+    scroll-behavior: auto !important;
+  }
+
+  :root {
+    --doodly-filter: none;
+  }
+
+  .wobble,
+  .hover-woosh,
+  .heart-bounce,
+  .card-move-up,
+  .card-move-down,
+  .card-voted {
+    /* biome-ignore lint/complexity/noImportantStyles: required for reduced motion override */
+    animation: none !important;
+  }
+
+  .hover-woosh:hover {
+    transform: none;
+  }
 }
