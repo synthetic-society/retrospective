@@ -32,9 +32,11 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm exec playwright install --with-deps chromium
 
-      - name: Check formatting
+      - name: Check formatting & lint
         run: pnpm format:check
-        continue-on-error: true
+
+      - name: Check Astro types
+        run: pnpm check
 
       - name: Build
         run: pnpm build

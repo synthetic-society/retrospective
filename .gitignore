@@ -19,6 +19,9 @@ logs/
 test-results/
 playwright-report/
 
+# Bundle analysis
+stats.html
+
 # IDE & Editor
 .idea/
 .vscode/
