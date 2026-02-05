@@ -268,7 +268,12 @@ export const useDeleteSession = () =>
     mutationFn: async (sessionId: string) => {
       const adminToken = getAdminToken(sessionId);
       if (!adminToken) throw new Error('No admin token for this session');
-      await api.delete(`sessions/${sessionId}?admin_token=${adminToken}`);
+      await fetch(`/api/sessions/${sessionId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${adminToken}` },
+      }).then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      });
       removeFromSessionHistory(sessionId);
     },
   });

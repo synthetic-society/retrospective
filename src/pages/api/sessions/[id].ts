@@ -24,11 +24,13 @@ export async function GET({ params, locals }: APIContext) {
   return jsonResponse(result, 200, 1); // 1s cache with stale-while-revalidate
 }
 
-export async function DELETE({ params, locals, url }: APIContext) {
+export async function DELETE({ params, locals, request }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
 
-  const parsed = v.safeParse(DeleteSessionSchema, { admin_token: url.searchParams.get('admin_token') });
+  const authHeader = request.headers.get('Authorization');
+  const admin_token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const parsed = v.safeParse(DeleteSessionSchema, { admin_token });
   if (!parsed.success) return validationErrorResponse(parsed.issues);
 
   const db = getDB(locals);

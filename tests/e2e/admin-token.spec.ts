@@ -155,7 +155,9 @@ test.describe('Admin Token - Multi-user', () => {
 
     // User B tries to delete via API with a wrong admin token (valid UUID format, but incorrect)
     const fakeToken = '00000000-0000-0000-0000-000000000000';
-    const response = await userB.request.delete(`/api/sessions/${sessionId}?admin_token=${fakeToken}`);
+    const response = await userB.request.delete(`/api/sessions/${sessionId}`, {
+      headers: { Authorization: `Bearer ${fakeToken}` },
+    });
     expect(response.status()).toBe(403);
 
     // Session should still exist - User A can access it
