@@ -4,6 +4,7 @@ import { DEMO_SESSION_ID } from '../lib/constants';
 import { createQueryClient, useCreateSession, useDeleteSession } from '../lib/queries';
 import type { Session } from '../lib/store';
 import { getSessionHistory, hasAdminToken } from '../lib/store';
+import ErrorBoundary from './ErrorBoundary';
 
 // Native date formatter
 const formatDate = (dateStr: string) => {
@@ -13,9 +14,11 @@ const formatDate = (dateStr: string) => {
 export default function Home() {
   const qc = useRef(createQueryClient());
   return (
-    <QueryClientProvider client={qc.current}>
-      <HomeContent />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={qc.current}>
+        <HomeContent />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

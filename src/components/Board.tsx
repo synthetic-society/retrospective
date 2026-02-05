@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'preact/hooks';
 import { createQueryClient, useCards, useSession, useVotes } from '../lib/queries';
 import type { Card, ColumnType, Session } from '../lib/store';
 import { AddCard, CardItem } from './Card';
+import ErrorBoundary from './ErrorBoundary';
 
 const COLUMNS: { type: ColumnType; title: string; placeholder: string }[] = [
   { type: 'glad', title: 'What went well', placeholder: "I'm glad that…" },
@@ -15,9 +16,11 @@ const COLUMNS: { type: ColumnType; title: string; placeholder: string }[] = [
 export default function Board({ session, isDemo = false }: { session: Session; isDemo?: boolean }) {
   const qc = useRef(createQueryClient());
   return (
-    <QueryClientProvider client={qc.current}>
-      <BoardContent session={session} isDemo={isDemo} />
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={qc.current}>
+        <BoardContent session={session} isDemo={isDemo} />
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
