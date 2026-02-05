@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 interface Props {
@@ -52,7 +53,9 @@ const _finalOgDescription = ogDescription || description;
     <!-- Preload font -->
     <link rel="preload" href="/annotation-mono-regular.woff2" as="font" type="font/woff2" crossorigin />
 
+    <link rel="manifest" href="/manifest.json" />
     <title>{title}</title>
+    <ClientRouter />
   </head>
   <body class="font-mono text-sketch-dark min-h-screen bg-bg">
     <!-- Hand-drawn SVG filter -->

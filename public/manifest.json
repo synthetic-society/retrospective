@@ -1,0 +1,16 @@
+{
+  "name": "Retrospective Board",
+  "short_name": "Retro",
+  "description": "A minimal, anonymous, collaborative retrospective board",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f0e8",
+  "theme_color": "#3c3836",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
