@@ -9,6 +9,15 @@ const trimmedString = (max: number) =>
     v.maxLength(max),
     v.transform((s) => s.trim()),
   );
+
+const sanitizedString = (max: number) =>
+  v.pipe(
+    v.string(),
+    v.minLength(1),
+    v.maxLength(max),
+    v.transform((s) => s.trim().replace(/<[^>]*>/g, '')),
+    v.minLength(1, 'Name must not be empty after sanitization'),
+  );
 export const UUIDSchema = v.pipe(v.string(), v.uuid());
 
 // Column types
@@ -16,7 +25,7 @@ export const ColumnTypeSchema = v.picklist(['glad', 'wondering', 'sad', 'action'
 export type ColumnType = v.InferOutput<typeof ColumnTypeSchema>;
 
 // Schemas
-export const CreateSessionSchema = v.object({ name: trimmedString(100) });
+export const CreateSessionSchema = v.object({ name: sanitizedString(100) });
 export const CreateCardSchema = v.object({
   column_type: ColumnTypeSchema,
   content: trimmedString(MAX_CARD_CONTENT_LENGTH),
