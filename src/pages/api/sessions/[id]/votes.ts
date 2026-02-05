@@ -32,9 +32,9 @@ export async function GET({ params, url, locals }: APIContext) {
   );
   const result = await db
     .prepare(
-      `SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ${limit}`,
+      'SELECT v.card_id FROM votes v JOIN cards c ON c.id = v.card_id WHERE c.session_id = ? AND v.voter_id = ? LIMIT ?',
     )
-    .bind(session_id, parsed.output.voter_id)
+    .bind(session_id, parsed.output.voter_id, limit)
     .all();
 
   return jsonResponse(
