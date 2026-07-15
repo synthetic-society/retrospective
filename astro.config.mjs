@@ -7,7 +7,9 @@ import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   output: 'server',
-  integrations: [preact({ compat: true }), playformCompress()],
+  // CSS: we disable @playform/compress's csso pass, which strips Tailwind 4.3+
+  // modern range media queries (`@media (width >= 48rem)`).
+  integrations: [preact({ compat: true }), playformCompress({ CSS: false })],
 
   vite: {
     optimizeDeps: {
