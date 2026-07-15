@@ -12,8 +12,8 @@ A minimal retrospective board with four columns: **Glad** (what went well), **Wo
 ## Quick Start
 
 ```bash
-pnpm install
-pnpm dev           # Local dev with wrangler D1
+bun install
+bun run dev       # Local dev with wrangler D1
 ```
 
 ## Database Setup
@@ -24,13 +24,13 @@ Create and configure the D1 database:
 
 ```bash
 # Create the database
-npx wrangler d1 create retrospective-db
+bunx wrangler d1 create retrospective-db
 
 # Copy the database_id from the output and update wrangler.jsonc
 # Replace "your-database-id-here" with the actual database_id
 
 # Apply migrations
-npx wrangler d1 migrations apply retrospective-db --remote
+bunx wrangler d1 migrations apply retrospective-db --remote
 ```
 
 ### For Local Development
@@ -39,10 +39,10 @@ For local testing, use a local D1 database:
 
 ```bash
 # Apply migrations to local database
-npx wrangler d1 migrations apply retrospective-db --local
+bunx wrangler d1 migrations apply retrospective-db --local
 
 # Run dev server (automatically uses local D1)
-pnpm dev
+bun run dev
 ```
 
 The local D1 database is stored in `.wrangler/state` and doesn't require a database_id in the config.
@@ -53,10 +53,10 @@ Build and deploy to Cloudflare Workers:
 
 ```bash
 # Build the application
-pnpm build
+bun run build
 
 # Deploy to Cloudflare Workers
-npx wrangler deploy
+bunx wrangler deploy
 ```
 
 The app will be deployed to your Cloudflare Workers subdomain at `https://retrospective.<your-subdomain>.workers.dev`
@@ -69,13 +69,13 @@ The project uses [Playwright](https://playwright.dev/) for end-to-end testing wi
 
 ```bash
 # Run all tests (starts dev server automatically)
-pnpm test
+bun run test
 
 # Run tests with interactive UI only
-pnpm test:ui
+bun run test:ui
 
 # Run accessibility tests only
-pnpm test:a11y
+bun run test:a11y
 ```
 
 ### Test Reports

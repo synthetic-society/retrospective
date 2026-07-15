@@ -13,7 +13,7 @@ dist/
 # Logs
 logs/
 *.log
-.pnpm-debug.log*
+
 
 # Testing
 test-results/

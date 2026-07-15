@@ -15,40 +15,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2.2.0
         with:
-          version: 9
+          bun-version: 1.3.14
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: bun install --frozen-lockfile
 
       - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: bun run playwright install --with-deps chromium
 
       - name: Check formatting & lint
-        run: pnpm format:check
+        run: bun run format:check
 
       - name: Check Astro types
-        run: pnpm check
+        run: bun run check
 
       - name: Build
-        run: pnpm build
+        run: bun run build
 
       - name: Apply D1 migrations (local)
         run: |
           for f in migrations/*.sql; do
-            pnpm exec wrangler d1 execute DB --local --file="$f"
+            bun run wrangler d1 execute DB --local --file="$f"
           done
 
       - name: Run tests
-        run: pnpm test
+        run: bun run test
 
       - name: Upload test results
         uses: actions/upload-artifact@v6
