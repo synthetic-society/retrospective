@@ -12,17 +12,14 @@ const trimmedString = (max: number) =>
 
 const sanitizedString = (max: number) =>
   v.pipe(
-    v.string(),
-    v.minLength(1),
-    v.maxLength(max),
-    v.transform((s) => s.trim().replace(/<[^>]*>/g, '')),
+    trimmedString(max),
+    v.transform((s) => s.replace(/<[^>]*>/g, '')),
     v.minLength(1, 'Name must not be empty after sanitization'),
   );
 export const UUIDSchema = v.pipe(v.string(), v.uuid());
 
 // Column types
-export const ColumnTypeSchema = v.picklist(['glad', 'wondering', 'sad', 'action']);
-export type ColumnType = v.InferOutput<typeof ColumnTypeSchema>;
+const ColumnTypeSchema = v.picklist(['glad', 'wondering', 'sad', 'action']);
 
 // Schemas
 export const CreateSessionSchema = v.object({ name: sanitizedString(100) });

@@ -1,34 +1,23 @@
-import type { APIContext } from 'astro';
 import * as v from 'valibot';
 import {
+  defineRoute,
   errorResponse,
-  isSessionExpired,
+  getValidSession,
   jsonResponse,
-  validateUUID,
   validationErrorResponse,
 } from '../../../lib/api-utils';
 import { getDB } from '../../../lib/db';
 import { DeleteSessionSchema } from '../../../lib/schemas';
 
-export async function GET({ params }: APIContext) {
-  const { id } = params;
-  if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
+export const GET = defineRoute({ invalidIdMessage: 'Invalid session ID' }, async ({ id }) => {
+  const { session, error } = await getValidSession(getDB(), id);
+  if (error) return error;
 
-  const result = await getDB()
-    .prepare('SELECT id, name, created_at, expires_at FROM sessions WHERE id = ?')
-    .bind(id)
-    .first<{ expires_at?: string }>();
-  if (!result) return errorResponse('Session not found', 404);
-  if (isSessionExpired(result.expires_at)) return errorResponse('Session expired', 410);
+  return jsonResponse(session, 200, 1); // 1s cache with stale-while-revalidate
+});
 
-  return jsonResponse(result, 200, 1); // 1s cache with stale-while-revalidate
-}
-
-export async function DELETE({ params, request }: APIContext) {
-  const { id } = params;
-  if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
-
-  const authHeader = request.headers.get('Authorization');
+export const DELETE = defineRoute({ invalidIdMessage: 'Invalid session ID' }, async ({ ctx, id }) => {
+  const authHeader = ctx.request.headers.get('Authorization');
   const admin_token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   const parsed = v.safeParse(DeleteSessionSchema, { admin_token });
   if (!parsed.success) return validationErrorResponse(parsed.issues);
@@ -46,4 +35,4 @@ export async function DELETE({ params, request }: APIContext) {
 
   await db.prepare('DELETE FROM sessions WHERE id = ?').bind(id).run();
   return new Response(null, { status: 204 });
-}
+});

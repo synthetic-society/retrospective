@@ -6,12 +6,12 @@ import { addToSessionHistory, getAdminToken, getVoterId, removeFromSessionHistor
 const request = (url: string, options?: RequestInit) => {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
-  const promise = fetch(`/api/${url}`, { ...options, signal: controller.signal }).then((res) => {
+  const res = fetch(`/api/${url}`, { ...options, signal: controller.signal }).then((r) => {
     clearTimeout(timeout);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res;
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r;
   });
-  return { json: <T>() => promise.then((r) => r.json() as Promise<T>) };
+  return { res, json: <T>() => res.then((r) => r.json() as Promise<T>) };
 };
 
 const api = {
@@ -20,7 +20,8 @@ const api = {
     request(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts.json) }),
   patch: (url: string, opts: { json: unknown }) =>
     request(url, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(opts.json) }),
-  delete: (url: string) => fetch(`/api/${url}`, { method: 'DELETE' }),
+  delete: (url: string, opts?: { headers?: HeadersInit }) =>
+    request(url, { method: 'DELETE', headers: opts?.headers }).res,
 };
 
 // Demo cards to seed the demo board
@@ -99,10 +100,26 @@ const DEMO_CARDS: Card[] = [
   },
 ];
 
-export const queryKeys = {
+const queryKeys = {
   session: (sessionId: string) => ['session', sessionId] as const,
   cards: (sessionId: string) => ['cards', sessionId] as const,
   votes: (sessionId: string, clientId: string) => ['votes', sessionId, clientId] as const,
+};
+
+// Invalidate session query after a successful mutation (skipped in demo mode)
+const invalidateSession = (qc: QueryClient, sessionId: string, isDemo: boolean) => {
+  if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
+};
+
+// Optimistic-update plumbing: cancel in-flight queries and snapshot the given keys,
+// returning a context that `rollback` restores on error.
+const snapshot = async (qc: QueryClient, keys: readonly (readonly unknown[])[]) => {
+  await Promise.all(keys.map((key) => qc.cancelQueries({ queryKey: key })));
+  return keys.map((key) => [key, qc.getQueryData(key)] as const);
+};
+
+const rollback = (qc: QueryClient, ctx?: readonly (readonly [readonly unknown[], unknown])[]) => {
+  for (const [key, data] of ctx ?? []) if (data !== undefined) qc.setQueryData(key, data);
 };
 
 export const useSession = (sessionId: string, initialData?: Session, isDemo = false) =>
@@ -167,7 +184,7 @@ export const useAddCard = (sessionId: string, isDemo = false) => {
     },
     onSuccess: (card) => {
       qc.setQueryData<Card[]>(queryKeys.cards(sessionId), (old) => [...(old || []), card]);
-      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
+      invalidateSession(qc, sessionId, isDemo);
     },
   });
 };
@@ -190,7 +207,7 @@ export const useUpdateCard = (sessionId: string, isDemo = false) => {
         queryKeys.cards(sessionId),
         (old) => old?.map((c) => (c.id === card.id ? card : c)) ?? [],
       );
-      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
+      invalidateSession(qc, sessionId, isDemo);
     },
   });
 };
@@ -204,15 +221,12 @@ export const useDeleteCard = (sessionId: string, isDemo = false) => {
       return api.delete(`cards/${id}?session_id=${sessionId}`);
     },
     onMutate: async (id) => {
-      await qc.cancelQueries({ queryKey: key });
-      const prev = qc.getQueryData<Card[]>(key);
+      const ctx = await snapshot(qc, [key]);
       qc.setQueryData<Card[]>(key, (old) => old?.filter((c) => c.id !== id) ?? []);
-      return { prev };
+      return ctx;
     },
-    onSuccess: () => {
-      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
-    },
-    onError: (_, __, ctx) => ctx?.prev && qc.setQueryData(key, ctx.prev),
+    onSuccess: () => invalidateSession(qc, sessionId, isDemo),
+    onError: (_, __, ctx) => rollback(qc, ctx),
   });
 };
 
@@ -228,10 +242,8 @@ export const useToggleVote = (sessionId: string, isDemo = false) => {
       return api.patch(`cards/${cardId}/vote`, { json: { session_id: sessionId, voter_id: voterId } });
     },
     onMutate: async (cardId) => {
-      await Promise.all([qc.cancelQueries({ queryKey: cardsKey }), qc.cancelQueries({ queryKey: votesKey })]);
-      const prevCards = qc.getQueryData<Card[]>(cardsKey);
-      const prevVotes = qc.getQueryData<string[]>(votesKey);
-      const hasVoted = new Set(prevVotes || []).has(cardId);
+      const ctx = await snapshot(qc, [cardsKey, votesKey]);
+      const hasVoted = new Set(qc.getQueryData<string[]>(votesKey) || []).has(cardId);
 
       qc.setQueryData<string[]>(votesKey, (old = []) =>
         hasVoted ? old.filter((id) => id !== cardId) : [...old, cardId],
@@ -241,16 +253,10 @@ export const useToggleVote = (sessionId: string, isDemo = false) => {
         (old) =>
           old?.map((c) => (c.id === cardId ? { ...c, votes: Math.max(0, c.votes + (hasVoted ? -1 : 1)) } : c)) ?? [],
       );
-      return { prevCards, prevVotes };
+      return ctx;
     },
-    onSuccess: () => {
-      if (!isDemo) qc.invalidateQueries({ queryKey: queryKeys.session(sessionId) });
-    },
-    onError: (_, __, ctx) => {
-      if (isDemo) return; // Don't rollback in demo mode
-      ctx?.prevCards && qc.setQueryData(cardsKey, ctx.prevCards);
-      ctx?.prevVotes && qc.setQueryData(votesKey, ctx.prevVotes);
-    },
+    onSuccess: () => invalidateSession(qc, sessionId, isDemo),
+    onError: (_, __, ctx) => rollback(qc, ctx),
   });
 };
 
@@ -268,12 +274,7 @@ export const useDeleteSession = () =>
     mutationFn: async (sessionId: string) => {
       const adminToken = getAdminToken(sessionId);
       if (!adminToken) throw new Error('No admin token for this session');
-      await fetch(`/api/sessions/${sessionId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${adminToken}` },
-      }).then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      });
+      await api.delete(`sessions/${sessionId}`, { headers: { Authorization: `Bearer ${adminToken}` } });
       removeFromSessionHistory(sessionId);
     },
   });
