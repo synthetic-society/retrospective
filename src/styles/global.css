@@ -111,29 +111,6 @@
     var(--doodly-border-color);
 }
 
-/* Wobble animation for doodly effect */
-@keyframes wobble {
-  0% {
-    transform: translate(0px, 0px) rotate(0deg);
-  }
-  25% {
-    transform: translate(1px, -1px) rotate(0.5deg);
-  }
-  50% {
-    transform: translate(-1px, 1px) rotate(-0.5deg);
-  }
-  75% {
-    transform: translate(1px, 1px) rotate(0.3deg);
-  }
-  100% {
-    transform: translate(0px, 0px) rotate(0deg);
-  }
-}
-
-.wobble {
-  animation: wobble 3s ease-in-out infinite;
-}
-
 /* Woosh scale effect for buttons */
 .hover-woosh {
   transition: transform 0.15s ease-out;
@@ -160,10 +137,6 @@
   100% {
     transform: scale(1);
   }
-}
-
-.heart-bounce {
-  animation: heartBounce 0.4s ease-in-out;
 }
 
 /* Card movement animations */
@@ -255,13 +228,6 @@
   opacity: 0.4;
 }
 
-/* Auto-resize textarea */
-.auto-resize {
-  field-sizing: content;
-  min-height: 1.5rem;
-  overflow: hidden;
-}
-
 /* Reusable button styles - shared base properties */
 .btn-primary,
 .btn-secondary,
@@ -348,9 +314,7 @@
     --doodly-filter: none;
   }
 
-  .wobble,
   .hover-woosh,
-  .heart-bounce,
   .card-move-up,
   .card-move-down,
   .card-voted {
