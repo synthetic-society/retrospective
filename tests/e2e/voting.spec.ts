@@ -1,43 +1,5 @@
-import { expect, type Page, test } from '@playwright/test';
-
-// Helper to create a session and navigate to it
-async function createSession(page: Page, name: string) {
-  await page.goto('/');
-  await page.getByPlaceholder('Sprint 42 Retro').fill(name);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-}
-
-// Helper to add a card to the "glad" column
-async function addCard(page: Page, content: string) {
-  // Click the placeholder to open the add card form
-  await page.getByText("I'm glad that…").click();
-  // Type content and submit
-  await page.getByRole('textbox').first().fill(content);
-
-  // Wait for the API response when adding
-  const responsePromise = page.waitForResponse(
-    (resp) =>
-      resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST',
-  );
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await responsePromise;
-
-  // Wait for the "Add" button to disappear (form closes after adding)
-  await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
-  // And the card should be visible (use aria-label to avoid matching live region)
-  await expect(page.getByRole('button', { name: `Edit card: ${content}` })).toBeVisible();
-}
-
-// Helper to click vote and wait for API response
-async function clickVote(page: Page, voteButton: ReturnType<Page['getByRole']>) {
-  const responsePromise = page.waitForResponse(
-    (resp) => resp.url().includes('/api/cards/') && resp.url().includes('/vote') && resp.request().method() === 'PATCH',
-  );
-  await voteButton.click();
-  await responsePromise;
-}
+import { expect, test } from '@playwright/test';
+import { addCard, clickVote, createSession } from './helpers';
 
 test.describe('Voting', () => {
   test('can create session, add card, and toggle votes', async ({ page }) => {
@@ -47,6 +9,7 @@ test.describe('Voting', () => {
     // Add a card
     const cardContent = `Test card ${Date.now()}`;
     await addCard(page, cardContent);
+    await expect(page.getByRole('button', { name: `Edit card: ${cardContent}` })).toBeVisible();
 
     // Find the vote button (look for button with aria-label containing "vote")
     const voteButton = page.getByRole('button', { name: /vote/i }).first();
@@ -86,8 +49,11 @@ test.describe('Voting', () => {
 
     // Add three cards
     await addCard(page, 'Card A');
+    await expect(page.getByRole('button', { name: 'Edit card: Card A' })).toBeVisible();
     await addCard(page, 'Card B');
+    await expect(page.getByRole('button', { name: 'Edit card: Card B' })).toBeVisible();
     await addCard(page, 'Card C');
+    await expect(page.getByRole('button', { name: 'Edit card: Card C' })).toBeVisible();
 
     // Verify initial order: Card A (0), Card B (1), Card C (2) - all have 0 votes
     // All cards have text visible (use role to avoid matching live region)

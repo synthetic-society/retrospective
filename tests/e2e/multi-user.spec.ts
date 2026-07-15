@@ -1,41 +1,5 @@
 import { type BrowserContext, expect, type Page, test } from '@playwright/test';
-
-// Helper to create a session and navigate to it
-async function createSession(page: Page, name: string) {
-  await page.goto('/');
-  await page.getByPlaceholder('Sprint 42 Retro').fill(name);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-}
-
-// Helper to add a card to the "glad" column
-async function addCard(page: Page, content: string) {
-  await page.getByText("I'm glad that…").click();
-  await page.getByRole('textbox').first().fill(content);
-
-  // Wait for the API response when adding
-  const responsePromise = page.waitForResponse(
-    (resp) =>
-      resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST',
-  );
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await responsePromise;
-
-  // Wait for the "Add" button to disappear (form closes after adding)
-  await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
-  // And the card text should be visible somewhere on the page
-  await expect(page.getByText(content)).toBeVisible();
-}
-
-// Helper to click vote and wait for API response
-async function clickVote(page: Page, voteButton: ReturnType<Page['getByRole']>) {
-  const responsePromise = page.waitForResponse(
-    (resp) => resp.url().includes('/api/cards/') && resp.url().includes('/vote') && resp.request().method() === 'PATCH',
-  );
-  await voteButton.click();
-  await responsePromise;
-}
+import { addCard, clickVote, createSession } from './helpers';
 
 // Helper to reload and wait for API data to load
 async function reloadAndWait(page: Page) {
@@ -84,6 +48,7 @@ test.describe('Multi-user voting', () => {
     // User A adds a card
     const cardContent = `Shared card ${Date.now()}`;
     await addCard(userA, cardContent);
+    await expect(userA.getByText(cardContent)).toBeVisible();
 
     // User B joins the same session
     await userB.goto(sessionUrl);
@@ -129,6 +94,7 @@ test.describe('Multi-user voting', () => {
     // User A adds a card and votes
     const cardContent = `Vote once ${Date.now()}`;
     await addCard(userA, cardContent);
+    await expect(userA.getByText(cardContent)).toBeVisible();
 
     const voteButtonA = userA.getByRole('button', { name: /vote/i }).first();
 

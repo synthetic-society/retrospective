@@ -1,25 +1,5 @@
-import { expect, type Page, test } from '@playwright/test';
-
-async function createSession(page: Page, name: string): Promise<string> {
-  await page.goto('/');
-  await page.getByPlaceholder('Sprint 42 Retro').fill(name);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-  return page.url();
-}
-
-async function addCard(page: Page, content: string) {
-  await page.getByText("I'm glad that…").click();
-  await page.getByRole('textbox').first().fill(content);
-  const responsePromise = page.waitForResponse(
-    (resp) =>
-      resp.url().includes('/api/sessions/') && resp.url().includes('/cards') && resp.request().method() === 'POST',
-  );
-  await page.getByRole('button', { name: 'Add', exact: true }).click();
-  await responsePromise;
-  await expect(page.getByRole('button', { name: 'Add', exact: true })).not.toBeVisible();
-}
+import { expect, test } from '@playwright/test';
+import { addCard, createSession } from './helpers';
 
 test.describe('Keyboard navigation', () => {
   test('skip link is accessible and moves focus to main content', async ({ page }) => {

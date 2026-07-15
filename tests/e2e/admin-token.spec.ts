@@ -1,14 +1,5 @@
 import { type BrowserContext, expect, type Page, test } from '@playwright/test';
-
-// Helper to create a session and return the session URL
-async function createSession(page: Page, name: string): Promise<string> {
-  await page.goto('/');
-  await page.getByPlaceholder('Sprint 42 Retro').fill(name);
-  await page.getByRole('button', { name: 'Create' }).click();
-  await expect(page).toHaveURL(/\/[0-9a-f-]{36}$/);
-  await expect(page.getByRole('heading', { name })).toBeVisible();
-  return page.url();
-}
+import { createSession } from './helpers';
 
 test.describe('Admin Token', () => {
   test('session list shows "Sessions you created" header', async ({ page }) => {
@@ -84,8 +75,7 @@ test.describe('Admin Token', () => {
 
   test('confirm delete removes session from list and database', async ({ page }) => {
     const sessionName = `Confirm Delete Test ${Date.now()}`;
-    const sessionUrl = await createSession(page, sessionName);
-    const sessionId = sessionUrl.split('/').pop();
+    const { id: sessionId } = await createSession(page, sessionName);
 
     await page.goto('/');
 
@@ -150,8 +140,7 @@ test.describe('Admin Token - Multi-user', () => {
   test('only creator can delete session via API', async () => {
     // User A creates a session
     const sessionName = `API Delete ${Date.now()}`;
-    const sessionUrl = await createSession(userA, sessionName);
-    const sessionId = sessionUrl.split('/').pop();
+    const { url: sessionUrl, id: sessionId } = await createSession(userA, sessionName);
 
     // User B tries to delete via API with a wrong admin token (valid UUID format, but incorrect)
     const fakeToken = '00000000-0000-0000-0000-000000000000';
@@ -168,8 +157,7 @@ test.describe('Admin Token - Multi-user', () => {
   test('delete API returns 403 without admin token', async () => {
     // User A creates a session
     const sessionName = `No Token ${Date.now()}`;
-    const sessionUrl = await createSession(userA, sessionName);
-    const sessionId = sessionUrl.split('/').pop();
+    const { id: sessionId } = await createSession(userA, sessionName);
 
     // Astro now rejects a cross-site-style state-changing request before it reaches endpoint validation.
     const response = await userA.request.delete(`/api/sessions/${sessionId}`);
