@@ -11,14 +11,14 @@ import { DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT } from '../../../../lib/constants';
 import { getDB } from '../../../../lib/db';
 import { VoterIdSchema } from '../../../../lib/schemas';
 
-export async function GET({ params, url, locals }: APIContext) {
+export async function GET({ params, url }: APIContext) {
   const { id: session_id } = params;
   if (!validateUUID(session_id)) return errorResponse('Invalid session ID', 400);
 
   const parsed = v.safeParse(VoterIdSchema, { voter_id: url.searchParams.get('voter_id') });
   if (!parsed.success) return validationErrorResponse(parsed.issues);
 
-  const db = getDB(locals);
+  const db = getDB();
   const session = await db
     .prepare('SELECT expires_at FROM sessions WHERE id = ?')
     .bind(session_id)

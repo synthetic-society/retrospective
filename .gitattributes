@@ -1,1 +1,2 @@
 bun.lock merge=binary linguist-language=JSON linguist-generated=true
+worker-configuration.d.ts merge=binary linguist-language=TypeScript linguist-generated=true

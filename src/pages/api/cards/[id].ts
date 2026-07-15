@@ -10,7 +10,7 @@ import {
 import { getDB } from '../../../lib/db';
 import { DeleteCardSchema, UpdateCardSchema } from '../../../lib/schemas';
 
-export async function PATCH({ params, request, locals }: APIContext) {
+export async function PATCH({ params, request }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid card ID', 400);
 
@@ -20,7 +20,7 @@ export async function PATCH({ params, request, locals }: APIContext) {
   const parsed = v.safeParse(UpdateCardSchema, body);
   if (!parsed.success) return validationErrorResponse(parsed.issues);
 
-  const db = getDB(locals);
+  const db = getDB();
   const existing = await db
     .prepare('SELECT id, session_id FROM cards WHERE id = ?')
     .bind(id)
@@ -45,7 +45,7 @@ export async function PATCH({ params, request, locals }: APIContext) {
   return jsonResponse(await db.prepare('SELECT * FROM cards WHERE id = ?').bind(id).first());
 }
 
-export async function DELETE({ params, locals, url }: APIContext) {
+export async function DELETE({ params, url }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid card ID', 400);
 
@@ -53,7 +53,7 @@ export async function DELETE({ params, locals, url }: APIContext) {
   const deleteParsed = v.safeParse(DeleteCardSchema, { session_id: url.searchParams.get('session_id') });
   if (!deleteParsed.success) return validationErrorResponse(deleteParsed.issues);
 
-  const db = getDB(locals);
+  const db = getDB();
   const existing = await db
     .prepare('SELECT id, session_id FROM cards WHERE id = ?')
     .bind(id)

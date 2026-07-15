@@ -24,11 +24,11 @@ const getValidSession = async (db: ReturnType<typeof getDB>, id: string) => {
 const parseLimit = (param: string | null) =>
   Math.min(Math.max(1, parseInt(param || '', 10) || DEFAULT_PAGE_LIMIT), MAX_PAGE_LIMIT);
 
-export async function GET({ params, url, locals }: APIContext) {
+export async function GET({ params, url }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
 
-  const db = getDB(locals);
+  const db = getDB();
   const { error } = await getValidSession(db, id);
   if (error) return error;
 
@@ -39,7 +39,7 @@ export async function GET({ params, url, locals }: APIContext) {
   return jsonResponse(result.results || [], 200, 1); // 1s cache with stale-while-revalidate
 }
 
-export async function POST({ params, request, locals }: APIContext) {
+export async function POST({ params, request }: APIContext) {
   const { id: session_id } = params;
   if (!validateUUID(session_id)) return errorResponse('Invalid session ID', 400);
 
@@ -49,7 +49,7 @@ export async function POST({ params, request, locals }: APIContext) {
   const parsed = v.safeParse(CreateCardSchema, body);
   if (!parsed.success) return validationErrorResponse(parsed.issues);
 
-  const db = getDB(locals);
+  const db = getDB();
   const { error } = await getValidSession(db, session_id);
   if (error) return error;
 

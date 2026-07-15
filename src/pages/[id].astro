@@ -21,7 +21,7 @@ let sessionName = isDemo ? "Demo Board" : "Retrospective Session";
 let sessionCreatedAt = new Date().toISOString();
 if (!isDemo) {
   try {
-    const db = getDB(Astro.locals);
+    const db = getDB();
     const result = await db
       .prepare("SELECT name, created_at FROM sessions WHERE id = ?")
       .bind(id)

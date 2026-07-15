@@ -11,9 +11,12 @@ A minimal retrospective board with four columns: **Glad** (what went well), **Wo
 
 ## Quick Start
 
+Install [Bun 1.3.14](https://bun.com/) and Node.js 22.12 or newer, then set up the project:
+
 ```bash
-bun install
-bun run dev       # Local dev with wrangler D1
+bun install --frozen-lockfile
+bun run wrangler d1 migrations apply retrospective-db --local
+bun run dev
 ```
 
 ## Database Setup
@@ -24,13 +27,13 @@ Create and configure the D1 database:
 
 ```bash
 # Create the database
-bunx wrangler d1 create retrospective-db
+bun run wrangler d1 create retrospective-db
 
 # Copy the database_id from the output and update wrangler.jsonc
 # Replace "your-database-id-here" with the actual database_id
 
 # Apply migrations
-bunx wrangler d1 migrations apply retrospective-db --remote
+bun run wrangler d1 migrations apply retrospective-db --remote
 ```
 
 ### For Local Development
@@ -39,10 +42,13 @@ For local testing, use a local D1 database:
 
 ```bash
 # Apply migrations to local database
-bunx wrangler d1 migrations apply retrospective-db --local
+bun run wrangler d1 migrations apply retrospective-db --local
 
 # Run dev server (automatically uses local D1)
 bun run dev
+
+# Run after every changes to wrangler.json to regenerate tests:
+bun run types
 ```
 
 The local D1 database is stored in `.wrangler/state` and doesn't require a database_id in the config.
@@ -52,11 +58,11 @@ The local D1 database is stored in `.wrangler/state` and doesn't require a datab
 Build and deploy to Cloudflare Workers:
 
 ```bash
-# Build the application
+# Regenerate Cloudflare types, type-check, and build the application
 bun run build
 
 # Deploy to Cloudflare Workers
-bunx wrangler deploy
+bun run wrangler deploy
 ```
 
 The app will be deployed to your Cloudflare Workers subdomain at `https://retrospective.<your-subdomain>.workers.dev`
@@ -68,6 +74,9 @@ The project uses [Playwright](https://playwright.dev/) for end-to-end testing wi
 ### Running Tests
 
 ```bash
+# Install the pinned browser once
+bun run playwright install --with-deps chromium
+
 # Run all tests (starts dev server automatically)
 bun run test
 
@@ -83,5 +92,5 @@ bun run test:a11y
 After running tests, an HTML report is generated in `playwright-report/`. Open it with:
 
 ```bash
-npx playwright show-report
+bun run playwright show-report
 ```

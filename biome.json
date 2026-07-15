@@ -1,12 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.3.13/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
   "vcs": {
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!!**/dist"]
+    "includes": ["**", "!!**/dist", "!!worker-configuration.d.ts"]
   },
   "formatter": {
     "enabled": true,
@@ -24,7 +24,7 @@
   },
   "linter": {
     "enabled": true,
-    "rules": { "recommended": true, "correctness": { "noUnknownFunction": "off" } }
+    "rules": { "preset": "recommended", "correctness": { "noUnknownFunction": "off" } }
   },
   "overrides": [
     {

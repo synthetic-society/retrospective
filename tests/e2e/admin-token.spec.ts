@@ -171,8 +171,8 @@ test.describe('Admin Token - Multi-user', () => {
     const sessionUrl = await createSession(userA, sessionName);
     const sessionId = sessionUrl.split('/').pop();
 
-    // Try to delete without providing admin token - should get validation error
+    // Astro now rejects a cross-site-style state-changing request before it reaches endpoint validation.
     const response = await userA.request.delete(`/api/sessions/${sessionId}`);
-    expect(response.status()).toBe(400); // Zod validation error for missing admin_token
+    expect(response.status()).toBe(403);
   });
 });

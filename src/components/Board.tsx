@@ -126,7 +126,6 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
 
   if (isLoading) {
     return (
-      // biome-ignore lint/a11y/useSemanticElements: preact doesn't support <output> element
       <div role="status" class="min-h-screen flex items-center justify-center" aria-busy="true">
         <div class="text-sketch-dark">~ Loading ~</div>
         <span class="sr-only">Loading board</span>
@@ -352,7 +351,6 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           );
         })}
       </div>
-      {/* biome-ignore lint/a11y/useSemanticElements: div with role="status" used because Preact doesn't support <output> */}
       <div role="status" class="sr-only" aria-live="polite" aria-atomic="true">
         {announcement}
       </div>

@@ -6,7 +6,7 @@ import { CreateSessionSchema } from '../../lib/schemas';
 
 const SESSION_EXPIRY_DAYS = 30;
 
-export async function POST({ request, locals }: APIContext) {
+export async function POST({ request }: APIContext) {
   const { data: body, error } = await parseJsonBody(request);
   if (error) return error;
 
@@ -18,7 +18,7 @@ export async function POST({ request, locals }: APIContext) {
   const created_at = new Date().toISOString();
   const expires_at = new Date(Date.now() + SESSION_EXPIRY_DAYS * 86400000).toISOString();
 
-  await getDB(locals)
+  await getDB()
     .prepare('INSERT INTO sessions (id, name, created_at, expires_at, admin_token) VALUES (?, ?, ?, ?, ?)')
     .bind(id, parsed.output.name, created_at, expires_at, admin_token)
     .run();

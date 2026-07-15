@@ -10,7 +10,7 @@ import {
 import { getDB } from '../../../../lib/db';
 import { VoteSchema } from '../../../../lib/schemas';
 
-export async function PATCH({ params, request, locals }: APIContext) {
+export async function PATCH({ params, request }: APIContext) {
   const { id: card_id } = params;
   if (!validateUUID(card_id)) return errorResponse('Invalid card ID', 400);
 
@@ -21,7 +21,7 @@ export async function PATCH({ params, request, locals }: APIContext) {
   if (!parsed.success) return validationErrorResponse(parsed.issues);
 
   const { voter_id, session_id } = parsed.output;
-  const db = getDB(locals);
+  const db = getDB();
 
   // Verify card belongs to the claimed session (session-scoped authorization)
   const card = await db

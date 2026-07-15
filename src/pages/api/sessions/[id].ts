@@ -10,11 +10,11 @@ import {
 import { getDB } from '../../../lib/db';
 import { DeleteSessionSchema } from '../../../lib/schemas';
 
-export async function GET({ params, locals }: APIContext) {
+export async function GET({ params }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
 
-  const result = await getDB(locals)
+  const result = await getDB()
     .prepare('SELECT id, name, created_at, expires_at FROM sessions WHERE id = ?')
     .bind(id)
     .first<{ expires_at?: string }>();
@@ -24,7 +24,7 @@ export async function GET({ params, locals }: APIContext) {
   return jsonResponse(result, 200, 1); // 1s cache with stale-while-revalidate
 }
 
-export async function DELETE({ params, locals, request }: APIContext) {
+export async function DELETE({ params, request }: APIContext) {
   const { id } = params;
   if (!validateUUID(id)) return errorResponse('Invalid session ID', 400);
 
@@ -33,7 +33,7 @@ export async function DELETE({ params, locals, request }: APIContext) {
   const parsed = v.safeParse(DeleteSessionSchema, { admin_token });
   if (!parsed.success) return validationErrorResponse(parsed.issues);
 
-  const db = getDB(locals);
+  const db = getDB();
   const session = await db
     .prepare('SELECT id, admin_token FROM sessions WHERE id = ?')
     .bind(id)
