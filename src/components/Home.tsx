@@ -125,7 +125,7 @@ function HomeContent() {
 
         <nav aria-label="Your sessions">
           <h2 class="text-center text-sketch-medium text-xs mb-4 uppercase tracking-widest">
-            <span aria-hidden="true">─── </span>Sessions you created<span aria-hidden="true"> ───</span>
+            <span aria-hidden="true">─── </span>Recent sessions<span aria-hidden="true"> ───</span>
           </h2>
           {sessions.length === 0 ? (
             <p class="text-center text-sketch-medium italic py-8 rounded doodly-border-dashed">

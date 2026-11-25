@@ -2,14 +2,9 @@ import { type BrowserContext, expect, type Page, test } from '@playwright/test';
 import { createSession } from './helpers';
 
 test.describe('Admin Token', () => {
-  test('session list shows "Sessions you created" header', async ({ page }) => {
+  test('session list shows "Recent sessions" header', async ({ page }) => {
     await page.goto('/');
-
-    // Verify the new header text
-    await expect(page.getByText('Sessions you created')).toBeVisible();
-
-    // Old text should not be present
-    await expect(page.getByText('Previous Sessions')).not.toBeVisible();
+    await expect(page.getByText('Recent sessions')).toBeVisible();
   });
 
   test('created session appears in list with expiration info', async ({ page }) => {
