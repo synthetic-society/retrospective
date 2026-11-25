@@ -12,9 +12,18 @@ export default defineConfig({
   integrations: [preact({ compat: true }), playformCompress({ CSS: false })],
 
   vite: {
+    // Vite reloads the page when it finds a dependency after startup, and that can break hydration
     optimizeDeps: {
-      include: ['@preact/signals', '@tanstack/react-query'],
+      include: [
+        '@preact/signals',
+        '@tanstack/react-query',
+        'astro/virtual-modules/transitions-events.js',
+        'astro/virtual-modules/transitions-router.js',
+        'astro/virtual-modules/transitions-swap-functions.js',
+        'astro/virtual-modules/transitions-types.js',
+      ],
     },
+    ssr: { optimizeDeps: { include: ['valibot', '@astrojs/preact/server.js'] } },
     plugins: [
       tailwindcss(),
       ...(process.env.ANALYZE ? [visualizer({ open: true, gzipSize: true, filename: 'stats.html' })] : []),
