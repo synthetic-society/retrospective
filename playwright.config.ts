@@ -19,6 +19,8 @@ export default defineConfig({
   ],
   webServer: {
     command: 'bun run dev -- --force',
+    // Keeps the server in the foreground
+    env: { ASTRO_DEV_BACKGROUND: '1' },
     url: 'http://localhost:4321',
     reuseExistingServer: !process.env.CI,
   },
