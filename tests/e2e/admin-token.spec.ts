@@ -161,13 +161,12 @@ test.describe('Admin Token - Multi-user', () => {
     await expect(userA.getByRole('heading', { name: sessionName })).toBeVisible();
   });
 
-  test('delete API returns 403 without admin token', async () => {
+  test('delete API returns 400 without admin token', async () => {
     // User A creates a session
     const sessionName = `No Token ${Date.now()}`;
     const { id: sessionId } = await createSession(userA, sessionName);
 
-    // Astro now rejects a cross-site-style state-changing request before it reaches endpoint validation.
     const response = await userA.request.delete(`/api/sessions/${sessionId}`);
-    expect(response.status()).toBe(403);
+    expect(response.status()).toBe(400);
   });
 });

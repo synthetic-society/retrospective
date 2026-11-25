@@ -11,7 +11,7 @@ A minimal retrospective board with four columns: **Glad** (what went well), **Wo
 
 ## Quick Start
 
-Install [Bun 1.3.14](https://bun.com/) and Node.js 22.12 or newer, then set up the project:
+Install [Bun 1.3.14](https://bun.com/) and Node.js 22.23.4 or newer, then set up the project:
 
 ```bash
 bun install --frozen-lockfile

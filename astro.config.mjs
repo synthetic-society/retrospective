@@ -23,7 +23,6 @@ export default defineConfig({
         'astro/virtual-modules/transitions-types.js',
       ],
     },
-    ssr: { optimizeDeps: { include: ['valibot', '@astrojs/preact/server.js'] } },
     plugins: [
       tailwindcss(),
       ...(process.env.ANALYZE ? [visualizer({ open: true, gzipSize: true, filename: 'stats.html' })] : []),
