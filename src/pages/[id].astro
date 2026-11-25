@@ -23,13 +23,14 @@ if (!isDemo) {
   try {
     const db = getDB();
     const result = await db
-      .prepare("SELECT name, created_at FROM sessions WHERE id = ?")
+      .prepare("SELECT name, created_at, expires_at FROM sessions WHERE id = ?")
       .bind(id)
-      .first<{ name: string; created_at: string }>();
-    if (result) {
-      sessionName = result.name;
-      sessionCreatedAt = result.created_at;
+      .first<{ name: string; created_at: string; expires_at?: string }>();
+    if (!result || (result.expires_at && new Date(result.expires_at) < new Date())) {
+      return Astro.redirect("/");
     }
+    sessionName = result.name;
+    sessionCreatedAt = result.created_at;
   } catch {
     // Fall back to defaults if DB is unavailable
   }
