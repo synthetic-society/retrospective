@@ -1,10 +1,22 @@
 import { type BrowserContext, expect, type Page, test } from '@playwright/test';
-import { createSession } from './helpers';
+import { addCard, createSession, waitForSessionRefetch } from './helpers';
 
 test.describe('Admin Token', () => {
   test('session list shows "Recent sessions" header', async ({ page }) => {
     await page.goto('/');
     await expect(page.getByText('Recent sessions')).toBeVisible();
+  });
+
+  test('delete button survives a session refetch', async ({ page }) => {
+    const sessionName = `Token Kept ${Date.now()}`;
+    const { id } = await createSession(page, sessionName);
+    const refetch = waitForSessionRefetch(page, id);
+    await addCard(page, 'Triggers a session refetch');
+    await refetch;
+
+    await page.goto('/');
+    const sessionItem = page.locator('li').filter({ hasText: sessionName });
+    await expect(sessionItem.getByRole('button', { name: 'Delete' })).toBeVisible();
   });
 
   test('created session appears in list with expiration info', async ({ page }) => {

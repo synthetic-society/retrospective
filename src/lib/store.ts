@@ -42,8 +42,9 @@ export const getSessionHistory = (): Session[] => storage(SESSIONS_KEY, []);
 
 export const addToSessionHistory = (session: Session): void => {
   if (!isBrowser) return;
+  const entry = { ...session, admin_token: session.admin_token ?? getAdminToken(session.id) };
   const sessions = getSessionHistory().filter((s) => s.id !== session.id);
-  localStorage.setItem(SESSIONS_KEY, JSON.stringify([session, ...sessions].slice(0, 20)));
+  localStorage.setItem(SESSIONS_KEY, JSON.stringify([entry, ...sessions].slice(0, 20)));
 };
 
 export const removeFromSessionHistory = (id: string): void => {
