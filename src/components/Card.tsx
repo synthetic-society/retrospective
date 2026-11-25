@@ -203,7 +203,7 @@ export function CardItem({
 
   return (
     <div
-      class={`min-h-16 group bg-white rounded p-3 transition-colors relative ${animClass} ${editing ? 'border-2 border-sketch-dark' : 'doodly-border'}`}
+      class={`min-h-16 group bg-white rounded p-3 transition-colors relative ${animClass} ${editing ? 'ring-2 ring-inset ring-sketch-dark' : 'doodly-border'}`}
     >
       <div class="float-right ml-2 mb-2 size-vote-wrapper">
         <VoteButton votes={card.votes} hasVoted={hasVoted} onClick={handleVote} />

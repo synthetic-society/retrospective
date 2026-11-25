@@ -142,7 +142,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
       {fullscreenCol && (
         <div
           ref={fullscreenTrapRef}
-          class="fixed inset-0 z-50 overflow-auto"
+          class="fixed inset-0 z-50 overflow-auto bg-beige-light"
           role="dialog"
           aria-modal="true"
           aria-labelledby="fullscreen-dialog-title"
@@ -151,7 +151,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
           <button
             type="button"
             tabIndex={-1}
-            class="absolute inset-0 w-full h-full bg-beige-light/95 cursor-default"
+            class="absolute inset-0 w-full h-full cursor-default"
             onClick={() => {
               fullscreenColumn.value = null;
             }}
@@ -168,7 +168,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                 onClick={() => {
                   fullscreenColumn.value = null;
                 }}
-                class="btn-primary btn-sm"
+                class="btn-primary btn-md"
                 title="Close fullscreen"
                 aria-label="Close fullscreen"
               >
@@ -188,7 +188,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                 </svg>
               </button>
             </div>
-            <div class="p-6">
+            <div class="p-4">
               {fullscreenCards.length === 0 ? (
                 <p class="text-center text-sketch-medium italic py-12">No cards in this column yet</p>
               ) : (
@@ -211,14 +211,17 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
         </div>
       )}
 
-      <header class="bg-white/40 p-3 flex items-center justify-between doodly-border-b">
+      <header
+        hidden={!!fullscreenCol}
+        class="bg-white/40 p-3 grid grid-cols-[1fr_auto_1fr] items-center doodly-border-b"
+      >
         <nav aria-label="Board navigation">
           <a href="/" class="text-sketch-medium hover:text-sketch-dark transition-colors text-sm">
             <span aria-hidden="true">← </span>Back
           </a>
         </nav>
-        <h1 class="text-sketch-dark font-medium truncate mx-4">{session.name}</h1>
-        <div class="flex gap-2">
+        <h1 class="text-sketch-dark font-medium truncate min-w-0 mx-4">{session.name}</h1>
+        <div class="flex gap-2 justify-self-end">
           <button
             type="button"
             onClick={toggleMusic}
@@ -249,7 +252,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
         </div>
       </header>
 
-      <div class="flex-1 md:grid md:grid-cols-4 md:gap-4 md:p-4 overflow-y-auto">
+      <div hidden={!!fullscreenCol} class="flex-1 md:grid md:grid-cols-4 md:gap-4 md:p-4 overflow-y-auto">
         {COLUMNS.map((col) => {
           const columnCards = getColumnCards(col.type);
           const isExpanded = expandedColumn.value === col.type;
@@ -265,7 +268,7 @@ function BoardContent({ session: initialSession, isDemo = false }: { session: Se
                 }}
                 aria-expanded={isExpanded}
                 aria-controls={`column-${col.type}`}
-                class="md:hidden w-full p-3 flex items-center justify-between bg-white/60 doodly-border cursor-pointer hover:bg-white transition-all mx-2 my-2"
+                class="md:hidden w-[calc(100%-1rem)] p-3 flex items-center justify-between bg-white/60 doodly-border cursor-pointer hover:bg-white transition-all mx-2 my-2"
               >
                 <div class="flex items-center gap-2">
                   <span class="text-sketch-dark" aria-hidden="true">

@@ -121,6 +121,7 @@ test.describe('Focus traps', () => {
     // Press Escape to close
     await page.keyboard.press('Escape');
     await expect(dialog).not.toBeVisible();
+    await expect(fullscreenButton).toBeFocused();
   });
 
   test('delete dialog traps focus and starts on Cancel', async ({ page }) => {

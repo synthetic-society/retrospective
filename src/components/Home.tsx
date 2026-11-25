@@ -51,12 +51,6 @@ function HomeContent() {
     window.location.href = `/${session.id}`;
   };
 
-  const handleDeleteClick = (id: string, e: Event) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDeleteConfirm(id);
-  };
-
   const handleDeleteConfirm = async () => {
     if (!deleteConfirm) return;
     await deleteSession.mutateAsync(deleteConfirm);
@@ -134,32 +128,27 @@ function HomeContent() {
           ) : (
             <ul class="space-y-2 list-none p-0 m-0">
               {sessions.map((s) => (
-                <li key={s.id}>
-                  <a
-                    href={`/${s.id}`}
-                    class="group block bg-white/60 hover:bg-white transition-all rounded p-3 doodly-border cursor-pointer"
-                  >
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-center gap-2 text-sketch-dark">
-                        <span aria-hidden="true">▸</span>
-                        <span class="font-medium">{s.name}</span>
-                      </div>
-                      {hasAdminToken(s.id) && (
-                        <button
-                          type="button"
-                          onClick={(e) => handleDeleteClick(s.id, e)}
-                          class="btn-danger btn-sm uppercase tracking-wider"
-                          title="Delete session"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                    <div class="flex justify-between items-center text-sketch-medium text-xs mt-1 ml-5">
-                      <span>{formatDate(s.created_at)}</span>
-                      {s.expires_at && <span class="text-sketch-medium">{formatExpiry(s.expires_at)}</span>}
-                    </div>
-                  </a>
+                <li key={s.id} class="bg-white/60 hover:bg-white transition-all rounded p-3 doodly-border">
+                  <div class="flex items-center justify-between">
+                    <a href={`/${s.id}`} class="flex items-center gap-2 text-sketch-dark after:absolute after:inset-0">
+                      <span aria-hidden="true">▸</span>
+                      <span class="font-medium">{s.name}</span>
+                    </a>
+                    {hasAdminToken(s.id) && (
+                      <button
+                        type="button"
+                        onClick={() => setDeleteConfirm(s.id)}
+                        class="btn-danger btn-sm uppercase tracking-wider z-10"
+                        title="Delete session"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                  <div class="flex justify-between items-center text-sketch-medium text-xs mt-1 ml-5">
+                    <span>{formatDate(s.created_at)}</span>
+                    {s.expires_at && <span>{formatExpiry(s.expires_at)}</span>}
+                  </div>
                 </li>
               ))}
             </ul>

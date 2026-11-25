@@ -6,12 +6,15 @@ const FOCUSABLE =
 export function useFocusTrap(active: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<Element | null>(null);
+  const wasActive = useRef(false);
+
+  if (active && !wasActive.current) previousFocus.current = document.activeElement;
+  wasActive.current = active;
 
   useEffect(() => {
     const el = containerRef.current;
     if (!active || !el) return;
 
-    previousFocus.current = document.activeElement;
     el.querySelectorAll<HTMLElement>(FOCUSABLE)[0]?.focus();
 
     const onKeyDown = (e: KeyboardEvent) => {

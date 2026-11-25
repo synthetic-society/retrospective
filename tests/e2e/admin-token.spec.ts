@@ -41,7 +41,7 @@ test.describe('Admin Token', () => {
     await page.goto('/');
 
     // Delete button should be visible for the session we created
-    const sessionItem = page.locator('a', { hasText: sessionName });
+    const sessionItem = page.locator('li', { hasText: sessionName });
     await expect(sessionItem.getByRole('button', { name: 'Delete' })).toBeVisible();
   });
 
@@ -52,7 +52,7 @@ test.describe('Admin Token', () => {
     await page.goto('/');
 
     // Click delete button
-    const sessionItem = page.locator('a', { hasText: sessionName });
+    const sessionItem = page.locator('li', { hasText: sessionName });
     await sessionItem.getByRole('button', { name: 'Delete' }).click();
 
     // Confirmation popup should appear
@@ -69,7 +69,7 @@ test.describe('Admin Token', () => {
     await page.goto('/');
 
     // Click delete, then cancel
-    const sessionItem = page.locator('a', { hasText: sessionName });
+    const sessionItem = page.locator('li', { hasText: sessionName });
     await sessionItem.getByRole('button', { name: 'Delete' }).click();
     await page.getByRole('button', { name: 'Cancel' }).click();
 
@@ -87,7 +87,7 @@ test.describe('Admin Token', () => {
     await page.goto('/');
 
     // Click delete, then confirm
-    const sessionItem = page.locator('a', { hasText: sessionName });
+    const sessionItem = page.locator('li', { hasText: sessionName });
     await sessionItem.getByRole('button', { name: 'Delete' }).click();
 
     // Wait for delete API call
@@ -134,13 +134,13 @@ test.describe('Admin Token - Multi-user', () => {
 
     // User A goes home - should see their session WITH delete button
     await userA.goto('/');
-    const userASessionItem = userA.locator('a', { hasText: sessionName });
+    const userASessionItem = userA.locator('li', { hasText: sessionName });
     await expect(userASessionItem).toBeVisible();
     await expect(userASessionItem.getByRole('button', { name: 'Delete' })).toBeVisible();
 
     // User B goes home - should NOT see User A's session (they didn't create it)
     await userB.goto('/');
-    const userBSessionItem = userB.locator('a', { hasText: sessionName });
+    const userBSessionItem = userB.locator('li', { hasText: sessionName });
     await expect(userBSessionItem).not.toBeVisible();
   });
 
