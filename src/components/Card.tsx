@@ -39,7 +39,7 @@ const handlePaste = (e: ClipboardEvent) => {
 
 function useAutoSave(sessionId: string, isDemo = false) {
   const updateCard = useUpdateCard(sessionId, isDemo);
-  const timeout = useRef<number>();
+  const timeout = useRef<number | undefined>(undefined);
   return (cardId: string, value: string, delay = 300) => {
     clearTimeout(timeout.current);
     timeout.current = window.setTimeout(() => updateCard.mutate({ id: cardId, content: value }), delay);

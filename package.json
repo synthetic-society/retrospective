@@ -28,7 +28,7 @@
     "@tailwindcss/vite": "^4.3.5",
     "@tanstack/react-query": "^5.108.4",
     "astro": "7.4.13",
-    "preact": "^10.29.8",
+    "preact": "11.2.0",
     "tailwindcss": "^4.3.5",
     "valibot": "^1.5.0"
   },
