@@ -40,9 +40,9 @@ const handlePaste = (e: ClipboardEvent) => {
 function useAutoSave(sessionId: string, isDemo = false) {
   const updateCard = useUpdateCard(sessionId, isDemo);
   const timeout = useRef<number>();
-  return (cardId: string, value: string) => {
+  return (cardId: string, value: string, delay = 300) => {
     clearTimeout(timeout.current);
-    timeout.current = window.setTimeout(() => updateCard.mutate({ id: cardId, content: value }), 300);
+    timeout.current = window.setTimeout(() => updateCard.mutate({ id: cardId, content: value }), delay);
   };
 }
 
@@ -160,6 +160,7 @@ export function CardItem({
   const [content, setContent] = useState(card.content);
   const [justVoted, setJustVoted] = useState(false);
   const editRef = useRef<HTMLSpanElement>(null);
+  const original = useRef(card.content);
   const deleteCard = useDeleteCard(sessionId, isDemo);
   const toggleVote = useToggleVote(sessionId, isDemo);
   const save = useAutoSave(sessionId, isDemo);
@@ -181,18 +182,23 @@ export function CardItem({
     save(card.id, sanitized);
   };
 
+  const startEditing = () => {
+    original.current = card.content;
+    setEditing(true);
+  };
+
+  const revert = () => {
+    if (content !== original.current) save(card.id, original.current, 0);
+    setContent(original.current);
+    setEditing(false);
+  };
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       setEditing(false);
     }
-    if (e.key === 'Escape') {
-      if (editRef.current) {
-        editRef.current.textContent = card.content;
-      }
-      setContent(card.content);
-      setEditing(false);
-    }
+    if (e.key === 'Escape') revert();
   };
 
   return (
@@ -236,7 +242,7 @@ export function CardItem({
               type="button"
               onMouseDown={(e) => {
                 e.preventDefault();
-                setEditing(false);
+                revert();
               }}
               class="btn-ghost btn-sm"
             >
@@ -262,11 +268,11 @@ export function CardItem({
           tabIndex={0}
           aria-label={`Edit card: ${card.content}`}
           class="text-sketch-dark text-sm leading-snug text-left dir-ltr cursor-text"
-          onClick={() => setEditing(true)}
+          onClick={startEditing}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
-              setEditing(true);
+              startEditing();
             }
           }}
         >

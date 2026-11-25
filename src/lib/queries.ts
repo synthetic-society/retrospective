@@ -202,6 +202,11 @@ export const useUpdateCard = (sessionId: string, isDemo = false) => {
       }
       return api.patch(`cards/${id}`, { json: { session_id: sessionId, content } }).json<Card>();
     },
+    onMutate: ({ id, content }) => {
+      qc.setQueryData<Card[]>(queryKeys.cards(sessionId), (old) =>
+        old?.map((c) => (c.id === id ? { ...c, content } : c)),
+      );
+    },
     onSuccess: (card) => {
       qc.setQueryData<Card[]>(
         queryKeys.cards(sessionId),

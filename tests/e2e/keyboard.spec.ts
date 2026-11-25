@@ -59,6 +59,16 @@ test.describe('Keyboard navigation', () => {
     await page.keyboard.press('Escape');
     await expect(textbox).not.toBeVisible();
 
+    // Escape must also discard edits that auto-save sent to the server
+    await cardButton.press('Enter');
+    await textbox.pressSequentially(' edited');
+    await page.waitForResponse((r) => r.url().includes('/api/cards/') && r.request().method() === 'PATCH');
+    const reverted = page.waitForResponse((r) => r.url().includes('/api/cards/') && r.request().method() === 'PATCH');
+    await page.keyboard.press('Escape');
+    await reverted;
+    await page.reload();
+    await expect(page.getByRole('button', { name: 'Edit card: Keyboard test card', exact: true })).toBeVisible();
+
     // Use Space to start editing
     await cardButton.focus();
     await page.keyboard.press('Space');
