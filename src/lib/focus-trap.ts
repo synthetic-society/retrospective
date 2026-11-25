@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'preact/hooks';
 
 const FOCUSABLE =
-  'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"]), [contenteditable]';
+  ':is(a[href], button:not([disabled]), textarea, input, select, [tabindex], [contenteditable]):not([tabindex="-1"])';
 
 export function useFocusTrap(active: boolean) {
   const containerRef = useRef<HTMLDivElement>(null);
